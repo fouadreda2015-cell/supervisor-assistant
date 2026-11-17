@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>المساعد الشخصي</title>
+<meta name="theme-color" content="#14365c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="المساعد الشخصي">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+<link rel="icon" href="icon-192.png?v=2">
+<style>
+:root{
+  --brand:#0e5c63; --brand-2:#e7f1f1; --ink:#1d2329; --muted:#66707a; --line:#e3e6ea;
+  --bg:#f5f6f8; --card:#fff; --ok:#1f7a4d; --warn:#b4570f; --bad:#b3261e;
+  --t-school:#2f6fb0; --t-class:#0e5c63; --t-exchange:#7a4fb0; --t-model:#a3622a;
+  --t-meeting:#4f6b2a; --t-course:#b0306a; --t-other:#7a838c;
+  --radius:14px; --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:-apple-system,"SF Arabic","Segoe UI","Noto Sans Arabic",Tahoma,Arial,sans-serif;
+  background:var(--bg);color:var(--ink);font-size:16px;line-height:1.55;-webkit-text-size-adjust:100%}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--brand)}
+.app{min-height:100vh;display:flex;flex-direction:column}
+header.top{position:sticky;top:0;z-index:20;background:var(--brand);color:#fff;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) 16px 12px;display:flex;align-items:center;gap:10px}
+header.top h1{font-size:18px;margin:0;font-weight:700;flex:1}
+header.top .sub{font-size:13px;opacity:.85}
+.iconbtn{background:rgba(255,255,255,.15);border:0;color:#fff;border-radius:10px;padding:7px 11px;cursor:pointer}
+main{flex:1;padding:16px;padding-bottom:calc(90px + var(--safe-b));max-width:980px;width:100%;margin:0 auto}
+nav.tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;background:#fff;border-top:1px solid var(--line);
+  display:flex;padding-bottom:var(--safe-b)}
+nav.tabs a{flex:1;text-align:center;padding:9px 2px 8px;text-decoration:none;color:var(--muted);font-size:12px}
+nav.tabs a .ic{display:block;font-size:21px;line-height:1.2}
+nav.tabs a.on{color:var(--brand);font-weight:700}
+@media (min-width:900px){
+  .app{flex-direction:row}
+  .shell{flex:1;display:flex;flex-direction:column;min-width:0}
+  nav.tabs{position:sticky;top:0;height:100vh;width:200px;flex-direction:column;border-top:0;border-left:1px solid var(--line);padding-top:70px}
+  nav.tabs a{flex:0;display:flex;gap:10px;align-items:center;padding:12px 18px;font-size:15px;text-align:right}
+  nav.tabs a .ic{display:inline;font-size:19px}
+  nav.tabs a.on{background:var(--brand-2)}
+  main{padding:24px 28px 40px}
+}
+@media (max-width:899px){.shell{display:contents}}
+h2{font-size:17px;margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+h2 .count{background:var(--brand-2);color:var(--brand);border-radius:20px;padding:0 9px;font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:10px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media (min-width:600px){.stats{grid-template-columns:repeat(4,1fr)}}
+.stat{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:12px 14px}
+.stat b{display:block;font-size:26px;line-height:1.2;color:var(--brand)}
+.stat span{font-size:13px;color:var(--muted)}
+.stat.warn b{color:var(--warn)}
+.ev{display:flex;gap:12px;align-items:flex-start;background:#fff;border:1px solid var(--line);
+  border-right:5px solid var(--tc,var(--t-other));border-radius:12px;padding:11px 13px;margin-bottom:8px;cursor:pointer}
+.ev .when{min-width:58px;text-align:center;font-size:13px;color:var(--muted)}
+.ev .when b{display:block;font-size:18px;color:var(--ink)}
+.ev .body{flex:1;min-width:0}
+.ev .ttl{font-weight:700}
+.ev .meta{font-size:13px;color:var(--muted)}
+.tag{display:inline-block;font-size:12px;border-radius:20px;padding:1px 9px;background:#eef0f2;color:#444;margin-left:4px}
+.tag.type{background:color-mix(in srgb,var(--tc) 14%,#fff);color:var(--tc)}
+.tag.done{background:#e3f2ea;color:var(--ok)}
+.tag.missed{background:#fbeee3;color:var(--warn)}
+.tag.cancelled{background:#f6e3e2;color:var(--bad)}
+.tag.postponed{background:#fff3cd;color:#8a6200}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.btn{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 14px;cursor:pointer;font-size:15px;
+  display:inline-flex;align-items:center;gap:6px;text-decoration:none;color:var(--ink)}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff;font-weight:700}
+.btn.sm{padding:5px 10px;font-size:13px;border-radius:8px}
+.btn.danger{color:var(--bad)}
+.btn:disabled{opacity:.5}
+.fab{position:fixed;left:18px;bottom:calc(78px + var(--safe-b));z-index:25;width:56px;height:56px;border-radius:50%;
+  border:0;background:var(--brand);color:#fff;font-size:30px;box-shadow:0 6px 18px rgba(0,0,0,.2);cursor:pointer}
+@media (min-width:900px){.fab{bottom:28px;left:28px}}
+.empty{color:var(--muted);text-align:center;padding:18px;background:#fff;border:1px dashed var(--line);border-radius:12px}
+.banner{background:#fff6e6;border:1px solid #f1d3a3;border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:14px}
+.banner.info{background:var(--brand-2);border-color:#c9e0e0}
+.search{width:100%;padding:11px 14px;border:1px solid var(--line);border-radius:12px;background:#fff;font-size:16px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:8px 0;scrollbar-width:none}
+.chip{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 12px;font-size:14px;cursor:pointer}
+.chip.on{background:var(--brand);color:#fff;border-color:var(--brand)}
+.list-item{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--brand-2);color:var(--brand);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.list-item .body{flex:1;min-width:0}
+.list-item .ttl{font-weight:700}
+.list-item .meta{font-size:13px;color:var(--muted)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:15px}
+.kv dt{color:var(--muted)} .kv dd{margin:0}
+.back{display:inline-block;margin-bottom:8px;text-decoration:none;font-size:15px}
+/* calendar */
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin:6px 0}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal .dow{text-align:center;font-size:12px;color:var(--muted);padding:4px 0}
+.cal .d{background:#fff;border:1px solid var(--line);border-radius:10px;min-height:52px;padding:4px;cursor:pointer;font-size:14px;position:relative}
+.cal .d.out{opacity:.35}
+.cal .d.today{border-color:var(--brand);border-width:2px}
+.cal .d.sel{background:var(--brand-2)}
+.cal .dots{display:flex;flex-wrap:wrap;gap:2px;margin-top:3px}
+.cal .dots i{width:7px;height:7px;border-radius:50%;background:var(--tc)}
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+@media (min-width:700px){.modal-bg{align-items:center}}
+.modal{background:#fff;width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px 18px calc(18px + var(--safe-b))}
+@media (min-width:700px){.modal{border-radius:18px}}
+.modal h3{margin:0 0 12px;font-size:18px}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:14px;color:var(--muted);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-size:16px}
+.field textarea{min-height:70px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.checks{display:flex;flex-wrap:wrap;gap:6px}
+.field .checks label{display:flex;margin:0;align-items:center;gap:5px;border:1px solid var(--line);border-radius:20px;padding:4px 11px;font-size:14px;color:var(--ink);cursor:pointer}
+.multi{max-height:170px;overflow:auto;border:1px solid var(--line);border-radius:10px;padding:6px 10px}
+.field .multi label{display:flex;gap:10px;align-items:center;justify-content:flex-start;padding:6px 0;margin:0;font-size:15px;color:var(--ink);border-bottom:1px solid #f1f2f4}
+.field .multi label:last-child{border-bottom:0}
+.field .multi input,.field .checks input{width:auto;flex:0 0 auto;margin:0;accent-color:var(--brand)}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(150px + var(--safe-b));background:#1d2329;color:#fff;
+  padding:10px 18px;border-radius:12px;z-index:60;font-size:15px;max-width:90vw;text-align:center}
+.soon{opacity:.75}
+.soon .tag{background:#fff3cd;color:#8a6200}
+.small{font-size:13px;color:var(--muted)}
+.sheet-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+
+:root{--t-personal:#3a7d44;--t-family:#c0612b;--t-health:#c23b4e;--t-money:#8a6d1d;--t-travel:#2a7fa0;--t-occasion:#9b3fa6;--t-holiday:#b3261e;--t-schoolev:#5d6b78}
+.scope{display:flex;background:#fff;border:1px solid var(--line);border-radius:12px;padding:3px;margin-bottom:12px}
+.scope button{flex:1;border:0;background:transparent;padding:8px 4px;border-radius:9px;font-size:15px;cursor:pointer;color:var(--muted)}
+.scope button.on{background:var(--brand);color:#fff;font-weight:700}
+.holiday-card{background:#fdeceb;border:1px solid #f3c2bf;border-radius:12px;padding:12px 14px;margin-bottom:10px;display:flex;gap:10px;align-items:center}
+.holiday-card b{color:var(--t-holiday)}
+.cal .d.hol{background:#fdeceb}
+.cal .d .hn{display:block;font-size:9px;color:var(--t-holiday);line-height:1.2;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.typegrid{display:flex;flex-wrap:wrap;gap:6px}
+.typegrid button{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 12px;font-size:14px;cursor:pointer}
+.typegrid button.on{background:var(--tc);border-color:var(--tc);color:#fff;font-weight:700}
+.grp-label{font-size:13px;color:var(--muted);margin:6px 0 4px}
+.rem-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;background:#f7f8fa;border:1px solid var(--line);border-radius:10px;padding:8px;margin-bottom:6px}
+.rem-row select,.rem-row input{width:auto !important;padding:7px 8px !important;font-size:15px !important}
+.rem-row input[type=number]{width:64px !important}
+.rem-row .x{margin-inline-start:auto;border:0;background:transparent;font-size:18px;color:var(--bad);cursor:pointer;padding:2px 8px}
+.rem-preview{font-size:13px;color:var(--brand);margin:2px 0 4px}
+details.more{border-top:1px solid var(--line);margin-top:6px;padding-top:8px}
+details.more summary{cursor:pointer;color:var(--brand);font-size:15px;margin-bottom:8px}
+.warnline{background:#fdeceb;color:var(--t-holiday);border-radius:8px;padding:6px 10px;font-size:14px;margin-top:6px}
+.tbl{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:12px;overflow:hidden}
+.tbl td,.tbl th{border-bottom:1px solid var(--line);padding:8px 10px;text-align:right;vertical-align:top}
+.tbl th{background:#f3f5f7;font-weight:700}
+.tag.rep{background:#eaf1fb;color:#2f6fb0}
+
+#printArea{display:none}
+@media print{
+  body.printing>*:not(#printArea){display:none !important}
+  body.printing{background:#fff !important}
+  body.printing #printArea{display:block;font-size:12.5px;color:#000}
+  @page{size:A4;margin:14mm}
+}
+#printArea .p-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1d4e89;padding-bottom:8px;margin-bottom:10px;font-size:12px;line-height:1.6}
+#printArea .p-title{font-size:19px;font-weight:700;color:#1d4e89;align-self:center}
+#printArea h4{margin:12px 0 5px;font-size:14px;color:#1d4e89}
+#printArea .p-tbl{width:100%;border-collapse:collapse}
+#printArea .p-tbl th,#printArea .p-tbl td{border:1px solid #999;padding:5px 7px;text-align:right;vertical-align:top}
+#printArea .p-tbl th{background:#eef2f8;width:28%}
+#printArea .p-obs th{width:auto}
+#printArea .p-plan th{width:auto}#printArea .p-plan td:nth-child(1){width:12%}#printArea .p-plan td:nth-child(2){width:7%;text-align:center}
+#printArea .p-obs th:first-child,#printArea .p-obs td:first-child{width:34%}
+#printArea .p-obs th:nth-child(2),#printArea .p-obs th:nth-child(3),#printArea .p-obs th:nth-child(4){width:10%;text-align:center}
+#printArea .p-box{border:1px solid #999;min-height:48px;padding:6px 8px}
+#printArea .p-sign{width:100%;margin-top:22px;text-align:center}
+#printArea .p-sign td{width:33%;padding:6px;vertical-align:top}
+
+.stbar{display:flex;gap:4px;width:100%;margin-top:2px}
+.stbar .st{flex:1;border:1px solid var(--line);background:#fff;border-radius:9px;padding:4px 2px;font-size:12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.3;color:var(--muted)}
+.stbar .st span{font-size:17px;filter:grayscale(1);opacity:.55}
+.stbar .st.on{font-weight:700;color:var(--ink)}
+.stbar .st.on span{filter:none;opacity:1}
+.stbar .st-done{background:#e3f2ea;border-color:#9fd3b6}
+.stbar .st-missed{background:#fbe9e7;border-color:#efb3ab}
+.stbar .st-postponed{background:#fff3cd;border-color:#ecd38a}
+.stbar .st-cancelled{background:#eceef1;border-color:#c5cad1}
+.tag.planned{background:#eef0f2}
+
+/* ===== 2.0 — طابع من طبيعة مصر وتراثها: لازورد النيل، ذهب الشمس، رمل البردي ===== */
+:root{
+  --brand:#1d4e89; --brand-2:#e6edf7; --gold:#c9962b; --gold-2:#f3e2b0; --sand:#f6efe0;
+  --ink:#2a2118; --muted:#7a6a55; --line:#e8dcc4; --bg:#f6efe0; --card:#fffdf8;
+  --t-school:#1d4e89; --t-class:#0f7c8c; --t-exchange:#7b4fa0; --t-model:#b5651d; --t-meeting:#4f7a3a; --t-course:#b0306a; --t-other:#8a7f70;
+  --t-personal:#2e8b57; --t-family:#d2691e; --t-health:#c0392b; --t-money:#a87b0c; --t-travel:#1a7fa6; --t-occasion:#8e44ad;
+  --radius:16px;
+}
+body{font-family:"Tajawal",-apple-system,"SF Arabic","Segoe UI",Tahoma,sans-serif;background-color:var(--bg);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='none' stroke='%23d8c49b' stroke-width='1' opacity='.55'%3E%3Cpath d='M28 6 L34 22 L50 28 L34 34 L28 50 L22 34 L6 28 L22 22Z'/%3E%3Crect x='17' y='17' width='22' height='22' transform='rotate(45 28 28)'/%3E%3C/g%3E%3C/svg%3E");
+  background-attachment:fixed}
+h1,h2,h3,.ttl,.stat b,.btn.pri,.cal-head b{font-family:"Cairo","Tajawal",-apple-system,"Segoe UI",Tahoma,sans-serif}
+header.top{position:relative;overflow:hidden;background:#14365c;color:#fff;min-height:138px;align-items:flex-start;padding:calc(env(safe-area-inset-top,0px) + 16px) 18px 40px}
+header.top .scene{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+header.top>div{position:relative;z-index:1}
+header.top h1{font-size:21px;font-weight:800;text-shadow:0 1px 6px rgba(0,0,0,.35)}
+header.top .sub{opacity:.95;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+main{padding-top:14px}
+.card,.stat,.list-item,.ev,.empty,.scope{background:var(--card);border-color:var(--line);box-shadow:0 1px 0 rgba(120,90,40,.06),0 4px 14px rgba(120,90,40,.06)}
+.stat b{color:var(--brand)}
+.stat{position:relative;overflow:hidden}
+.stat::after{content:"";position:absolute;inset:auto 0 0 0;height:3px;background:linear-gradient(90deg,var(--gold),#e8c46a)}
+h2{color:#3a2c1c}
+h2 .count{background:var(--gold-2);color:#7a5a12}
+.btn.pri{background:linear-gradient(180deg,#2a62a6,#1d4e89);border-color:#1d4e89}
+.chip.on,.scope button.on{background:linear-gradient(180deg,#2a62a6,#1d4e89);border-color:#1d4e89}
+.avatar{background:linear-gradient(135deg,#f3e2b0,#e9cf8a);color:#5b3f0b}
+.banner{background:#fff4dc;border-color:#ecd39b}
+.holiday-card{background:linear-gradient(90deg,#fde8e4,#fff4ea);border-color:#f2c3b8}
+.ev{border-right-width:6px}
+/* الشريط السفلي مع زر الإضافة في النص */
+nav.tabs{background:rgba(255,253,248,.97);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-top:1px solid var(--line);box-shadow:0 -4px 18px rgba(80,60,20,.08)}
+nav.tabs a{color:#8a7a62}
+nav.tabs a.on{color:var(--brand)}
+nav.tabs a.add{position:relative;color:#7a5a12;font-weight:700}
+nav.tabs a.add .ic{width:58px;height:58px;margin:-30px auto 2px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;line-height:1;color:#fff;
+  background:radial-gradient(circle at 35% 30%,#f2c869,#c9962b 60%,#a8781a);box-shadow:0 6px 16px rgba(169,120,26,.45),0 0 0 5px #fffdf8}
+.fab{display:none !important}
+@media (min-width:900px){
+  nav.tabs a.add .ic{width:auto;height:auto;margin:0;background:none;box-shadow:none;color:#c9962b;font-size:22px;display:inline}
+  nav.tabs a.add{background:#fff4dc;margin:6px 10px;border-radius:12px}
+  header.top{min-height:215px}
+}
+/* اختصارات واضحة في «اليوم» */
+.bigacts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.bigact{display:flex;align-items:center;gap:10px;padding:14px;border-radius:16px;border:0;cursor:pointer;color:#fff;text-align:right;font-size:15px;text-decoration:none;box-shadow:0 6px 16px rgba(29,78,137,.18)}
+.bigact b{display:block;font-family:"Cairo",sans-serif;font-size:16px}
+.bigact .bi{font-size:28px;line-height:1}
+.bigact.a{background:linear-gradient(135deg,#2a62a6,#1d4e89)}
+.bigact.b{background:linear-gradient(135deg,#d9a83f,#b07d17);box-shadow:0 6px 16px rgba(176,125,23,.25)}
+/* خطتي الشهرية */
+.plan-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:2px 0 8px}
+.plan-head b{font-size:20px}
+.msum{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.msum span{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:3px 11px;font-size:13px}
+.dayrow{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+.dayrow.hol{background:#fff1ee;border-color:#f2c3b8}
+.dayrow.today{border:2px solid var(--brand)}
+.dayrow.wkend .dname{color:#a07a3a}
+.dayrow .dhead{display:flex;align-items:center;gap:8px}
+.dayrow .dname{font-weight:700;font-family:"Cairo",sans-serif;flex:1}
+.dayrow .dnum{width:38px;height:38px;border-radius:12px;background:var(--gold-2);color:#6b4c0e;display:flex;align-items:center;justify-content:center;font-weight:800;font-family:"Cairo",sans-serif}
+.dayrow .addday{width:38px;height:38px;border-radius:50%;border:0;background:linear-gradient(180deg,#2a62a6,#1d4e89);color:#fff;font-size:22px;cursor:pointer;flex:none}
+.mini{display:flex;align-items:center;gap:8px;padding:6px 8px;margin-top:6px;border-radius:10px;background:#faf6ec;border-right:4px solid var(--tc);cursor:pointer;font-size:14px}
+.mini .tm{color:var(--muted);font-size:13px;min-width:54px}
+.mini .st-ic{margin-inline-start:auto}
+.qa{margin-top:8px;padding:10px;border-radius:12px;background:#eef3fa;border:1px dashed #9db6d8}
+.qa input,.qa select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:16px;background:#fff;margin-bottom:6px}
+.qa .r{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="tabs" id="tabs">
+    <a href="#today" data-r="today"><span class="ic">🏠</span>اليوم</a>
+    <a href="#plan" data-r="plan"><span class="ic">🗓️</span>خطتي</a>
+    <a href="#" data-r="add" class="add" id="navAdd"><span class="ic">+</span>موعد جديد</a>
+    <a href="#work" data-r="work"><span class="ic">💼</span>العمل</a>
+    <a href="#more" data-r="more"><span class="ic">☰</span>المزيد</a>
+  </nav>
+  <div class="shell">
+    <header class="top">
+<svg class="scene" viewBox="0 0 800 200" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0e2747"/><stop offset=".45" stop-color="#23497a"/><stop offset=".72" stop-color="#c9785a"/><stop offset=".9" stop-color="#f2b866"/></linearGradient>
+<radialGradient id="sun" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff3c4"/><stop offset=".6" stop-color="#f8cf6a"/><stop offset="1" stop-color="#f3b24f" stop-opacity="0"/></radialGradient>
+<linearGradient id="nile" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a7f9e"/><stop offset="1" stop-color="#123f57"/></linearGradient>
+<pattern id="frieze" width="24" height="10" patternUnits="userSpaceOnUse"><rect width="24" height="10" fill="#14365c"/><path d="M0 5 L6 0 L12 5 L6 10Z M12 5 L18 0 L24 5 L18 10Z" fill="#d4a53c"/><circle cx="12" cy="5" r="1.4" fill="#f3e2b0"/></pattern>
+</defs>
+<rect width="800" height="200" fill="url(#sky)"/>
+<g fill="#fff" opacity=".7"><circle cx="40" cy="22" r="1.2"/><circle cx="120" cy="40" r="1"/><circle cx="210" cy="16" r="1.3"/><circle cx="330" cy="34" r="1"/><circle cx="90" cy="70" r=".9"/><circle cx="260" cy="58" r=".8"/></g>
+<path d="M0 160 C120 146 220 150 330 156 C440 150 560 144 800 152 L800 172 L0 172Z" fill="#d79c58"/><g transform="translate(-250 0)"><circle cx="560" cy="146" r="58" fill="url(#sun)"/>
+<circle cx="560" cy="146" r="24" fill="#fbe08f"/>
+
+<path d="M420 160 L452 128 L486 160Z" fill="#e4b06b"/><path d="M452 128 L486 160 L470 160Z" fill="#a9733c"/>
+<path d="M470 162 L566 72 L664 162Z" fill="#eab86f"/><path d="M566 72 L664 162 L618 162Z" fill="#b07a3e"/>
+<g stroke="#c48b4a" stroke-width="1" opacity=".55"><path d="M500 134 L632 134"/><path d="M520 116 L612 116"/><path d="M540 97 L592 97"/><path d="M486 149 L646 149"/></g>
+<path d="M640 164 L700 108 L762 164Z" fill="#e2ab63"/><path d="M700 108 L762 164 L734 164Z" fill="#a46e37"/>
+</g><rect y="166" width="800" height="26" fill="url(#nile)"/>
+<g stroke="#9fd3e3" stroke-width="1.4" fill="none" opacity=".55" stroke-linecap="round"><path d="M30 176 q10 -3 20 0"/><path d="M140 182 q12 -3 24 0"/><path d="M380 178 q10 -3 20 0"/><path d="M520 184 q14 -3 28 0"/><path d="M690 177 q10 -3 20 0"/><path d="M600 176 q8 -2 16 0" stroke="#f6d27a"/><path d="M560 182 q8 -2 16 0" stroke="#f6d27a"/></g>
+<path d="M0 166 C40 160 90 158 130 162 L130 168 L0 168Z" fill="#2c5e3a"/>
+<g transform="translate(600 150)"><path d="M-30 20 Q0 30 32 20 L26 26 Q0 32 -24 26Z" fill="#4a2c18"/><path d="M0 20 L0 -46" stroke="#4a2c18" stroke-width="2"/><path d="M1 -44 L1 16 L-34 16Z" fill="#f6ecd4"/><path d="M1 -44 L1 16 L-34 16Z" fill="none" stroke="#d8c39a" stroke-width="1"/><path d="M-6 -50 L22 -6" stroke="#4a2c18" stroke-width="1.6"/></g>
+<g fill="#1f4a2e"><path d="M70 168 C74 140 72 118 78 92 L82 92 C78 120 80 142 76 168Z" fill="#5a3a22"/>
+<path d="M80 92 C60 84 44 90 30 102 C48 94 62 94 80 96Z"/><path d="M80 92 C66 76 52 74 38 78 C56 80 68 86 80 95Z"/><path d="M80 92 C88 74 104 68 118 70 C104 76 92 84 81 95Z"/><path d="M80 92 C100 86 118 92 128 104 C112 96 96 94 80 96Z"/><path d="M80 92 C80 76 86 66 94 60 C88 72 85 82 82 94Z"/></g>
+<g fill="#1f4a2e"><path d="M118 168 C121 150 120 136 124 120 L127 120 C124 138 125 152 122 168Z" fill="#5a3a22"/>
+<path d="M126 120 C112 114 100 118 92 126 C104 122 114 122 126 123Z"/><path d="M126 120 C132 106 144 102 154 104 C144 108 134 114 127 123Z"/><path d="M126 120 C140 116 152 120 158 130 C146 124 136 122 126 123Z"/><path d="M126 120 C122 106 114 100 104 98 C114 104 120 112 125 122Z"/></g>
+<g fill="#1f4a2e"><path d="M772 168 C775 148 774 132 778 114 L781 114 C778 134 779 150 776 168Z" fill="#5a3a22"/>
+<path d="M780 114 C766 108 754 112 744 122 C758 116 768 116 780 117Z"/><path d="M780 114 C786 100 798 96 808 98 C798 102 788 108 781 117Z"/><path d="M780 114 C776 100 768 94 758 92 C768 98 774 106 779 116Z"/></g>
+<rect y="192" width="800" height="8" fill="url(#frieze)"/>
+</svg>
+      <div style="flex:1">
+        <h1>المساعد الشخصي <span id="syncBadge" style="display:none;font-size:15px;cursor:pointer" onclick="location.hash='#sync'"></span></h1>
+        <div class="sub" id="todayLabel"></div>
+      </div>
+    </header>
+    <main id="view"></main>
+  </div>
+</div>
+<button class="fab" id="fab" title="موعد جديد" aria-label="موعد جديد">+</button>
+<input type="file" id="importFile" accept=".json,application/json" hidden>
+
+<script src="seed.js"></script>
+<script>
+"use strict";
+/* ============ أساسيات ============ */
+var APP_VERSION = "2.2";
+var KEY = "msa_v1", PREV = "msa_prev";
+var TYPES = {
+  school:   {name:"زيارة مدرسية",  c:"var(--t-school)",   g:"work", edu:1},
+  class:    {name:"زيارة صفية",    c:"var(--t-class)",    g:"work", edu:1},
+  exchange: {name:"زيارة تبادلية", c:"var(--t-exchange)", g:"work", edu:1},
+  model:    {name:"درس تطبيقي",    c:"var(--t-model)",    g:"work", edu:1},
+  meeting:  {name:"اجتماع",        c:"var(--t-meeting)",  g:"work"},
+  course:   {name:"دورة / مشغل",   c:"var(--t-course)",   g:"work"},
+  other:    {name:"عمل آخر",       c:"var(--t-other)",    g:"work"},
+  personal: {name:"شخصي",          c:"var(--t-personal)", g:"life"},
+  family:   {name:"عائلة",         c:"var(--t-family)",   g:"life"},
+  health:   {name:"صحة وطبيب",     c:"var(--t-health)",   g:"life"},
+  money:    {name:"مالية وفواتير", c:"var(--t-money)",    g:"life"},
+  travel:   {name:"سفر",           c:"var(--t-travel)",   g:"life"},
+  occasion: {name:"مناسبات",       c:"var(--t-occasion)", g:"life"}
+};
+var SC_TYPES = {holiday:{name:"إجازة رسمية",c:"var(--t-holiday)"},schoolev:{name:"التقويم الدراسي",c:"var(--t-schoolev)"}};
+var STATUS = {planned:"🕓 مخطط", done:"✅ تم التنفيذ", missed:"❌ لم يتم", postponed:"⏸️ مؤجل", cancelled:"🚫 ملغي"};
+var ST_BTNS = [["done","✅","تم"],["missed","❌","لم يتم"],["postponed","⏸️","مؤجل"],["cancelled","🚫","ملغي"]];
+/* المواعيد اللي مر وقتها تُسجّل «تم التنفيذ» تلقائيًا، وتقدر تغيّرها */
+function evEndTime(e){
+  if(!e.start){var d=parseISO(e.date);d.setDate(d.getDate()+1);return d;}
+  var x=evStart(e);
+  if(e.end){var p=e.end.split(":");x.setHours(+p[0],+p[1],0,0);}else x=new Date(x.getTime()+3600e3);
+  return x;
+}
+function autoComplete(){
+  var now=new Date(),n=0;
+  (S.events||[]).forEach(function(e){if(e.status==="planned"&&!e.repeat&&e.date&&evEndTime(e)<=now){e.status="done";e.autoDone=true;n++;}});
+  if(n)save(true);return n;
+}
+var REPEAT = {"":"لا يتكرر",daily:"كل يوم",weekly:"كل أسبوع",monthly:"كل شهر",yearly:"كل سنة"};
+var UNITS = {m:"دقيقة",h:"ساعة",d:"يوم"};
+var DEF_REM = {
+  school:[{n:1,u:"d",at:"20:00"},{n:0,u:"d",at:"06:30"}], class:[{n:1,u:"d",at:"20:00"},{n:0,u:"d",at:"06:30"}],
+  exchange:[{n:1,u:"d",at:"20:00"},{n:0,u:"d",at:"06:30"}], model:[{n:1,u:"d",at:"20:00"},{n:0,u:"d",at:"06:30"}],
+  meeting:[{n:1,u:"d"},{n:1,u:"h"}], course:[{n:1,u:"d"},{n:1,u:"h"}], other:[{n:1,u:"d"},{n:1,u:"h"}],
+  personal:[{n:1,u:"h"}], family:[{n:1,u:"d",at:"19:00"},{n:2,u:"h"}], health:[{n:1,u:"d",at:"19:00"},{n:2,u:"h"}],
+  money:[{n:3,u:"d",at:"19:00"},{n:1,u:"d",at:"19:00"}], travel:[{n:1,u:"d",at:"19:00"},{n:3,u:"h"}], occasion:[{n:1,u:"d",at:"19:00"}],
+  holiday:[{n:1,u:"d",at:"19:00"}]
+};
+/* التقويم الدراسي 2026/2027م — وزارة التعليم (منقول من «جودة وأثر») */
+var SCHOOL_CAL = [
+  ["2026-08-27","2026-08-27","المولد النبوي الشريف","holiday"],
+  ["2026-08-30","2026-09-03","دوام أعضاء الهيئة التعليمية","schoolev"],
+  ["2026-09-06","2026-09-06","بداية الفصل الدراسي الأول","schoolev"],
+  ["2026-11-25","2026-11-26","إجازة اليوم الوطني","holiday"],
+  ["2026-12-01","2026-12-01","يوم الأنشطة التربوية","schoolev"],
+  ["2026-12-20","2026-12-31","امتحانات نهاية الفصل الأول (مع استمرار دوام الصفوف 1–4)","schoolev"],
+  ["2027-01-03","2027-01-21","امتحانات نهاية الفصل الأول وأعمال التصحيح","schoolev"],
+  ["2027-01-05","2027-01-05","الإسراء والمعراج","holiday"],
+  ["2027-01-11","2027-01-11","يوم تولي السلطان مقاليد الحكم","holiday"],
+  ["2027-01-24","2027-01-28","إجازة منتصف العام الدراسي","holiday"],
+  ["2027-01-31","2027-01-31","بداية الفصل الدراسي الثاني","schoolev"],
+  ["2027-02-24","2027-02-24","يوم المعلم العماني","schoolev"],
+  ["2027-02-25","2027-02-25","إجازة يوم المعلم","holiday"],
+  ["2027-03-08","2027-03-11","عيد الفطر المبارك","holiday"],
+  ["2027-05-16","2027-05-18","عيد الأضحى المبارك","holiday"],
+  ["2027-06-01","2027-06-10","امتحانات نهاية الفصل الثاني (مع استمرار دوام الصفوف 1–4)","schoolev"],
+  ["2027-06-06","2027-06-06","رأس السنة الهجرية","holiday"],
+  ["2027-06-13","2027-07-13","امتحانات نهاية الفصل الثاني وأعمال التصحيح","schoolev"],
+  ["2027-07-14","2027-08-26","إجازة نهاية العام الدراسي","holiday"],
+  ["2027-08-29","2027-08-31","دوام أعضاء الهيئة التعليمية","schoolev"]
+].map(function(r,i){return {id:"sc"+i,date:r[0],to:r[1],title:r[2],type:r[3],sc:true};});
+var MUSIC_ASSESS = {
+  "2026-10":[["5–10","العرض الشفوي والأنشطة العملية (من أكتوبر إلى ديسمبر)"],["11–12","الأنشطة العملية (1)"]],
+  "2026-11":[["1–4","الأنشطة العملية (1)"],["5–10","العرض الشفوي والأنشطة العملية"],["11–12","الأنشطة العملية (2)"]],
+  "2026-12":[["1–4","الملاحظة (1)"],["5–10","العرض الشفوي والأنشطة العملية"],["11–12","اختبار قصير"]],
+  "2027-03":[["5–10","العرض الشفوي والأنشطة العملية (من مارس إلى مايو)"],["11–12","الأنشطة العملية (1)"]],
+  "2027-04":[["1–4","الأنشطة العملية (2)"],["5–10","العرض الشفوي والأنشطة العملية"],["11–12","اختبار قصير"]],
+  "2027-05":[["1–4","الملاحظة (2)"],["5–10","العرض الشفوي والأنشطة العملية"],["11–12","الأنشطة العملية (2)"]]
+};
+var AR_MONTHS = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+var AR_DAYS = ["الأحد","الإثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function $(id){return document.getElementById(id);}
+function pad(n){return (n<10?"0":"")+n;}
+function iso(d){return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());}
+function todayISO(){return iso(new Date());}
+function parseISO(s){var p=String(s).split("-");return new Date(+p[0],+p[1]-1,+p[2]);}
+function addDays(s,n){var d=parseISO(s);d.setDate(d.getDate()+n);return iso(d);}
+function daysBetween(a,b){return Math.round((parseISO(b)-parseISO(a))/864e5);}
+function fmtDate(s,withDay){if(!s)return "بدون تاريخ";var d=parseISO(s);return (withDay?AR_DAYS[d.getDay()]+" ":"")+d.getDate()+" "+AR_MONTHS[d.getMonth()]+" "+d.getFullYear();}
+function fmtShort(s){var d=parseISO(s);return d.getDate()+" "+AR_MONTHS[d.getMonth()];}
+function fmtTime(t){if(!t)return "";var p=t.split(":"),h=+p[0],m=p[1];var ap=h<12?"ص":"م";h=h%12||12;return h+":"+m+" "+ap;}
+function fmtRange(a,b){return a===b||!b?fmtShort(a):(parseISO(a).getMonth()===parseISO(b).getMonth()?parseISO(a).getDate()+"–"+fmtShort(b):fmtShort(a)+" – "+fmtShort(b));}
+function uid(p){return (p||"e")+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function toast(msg){var t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);setTimeout(function(){t.remove();},2800);}
+function isIOS(){return /iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);}
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function isWork(t){return (TYPES[t]||{}).g==="work";}
+
+/* ============ التخزين وترحيل البيانات ============ */
+var S;
+function blank(){return {v:2,settings:{supervisor:"",lastBackup:null,createdAt:new Date().toISOString()},teachers:[],schools:[],events:[]};}
+var OLD_REM={10080:{n:7,u:"d"},1440:{n:1,u:"d"},120:{n:2,u:"h"},60:{n:1,u:"h"},15:{n:15,u:"m"}};
+function migrate(st){
+  st.settings=st.settings||{};
+  var se=st.settings;
+  if(!se.scope)se.scope="all";
+  if(se.showSchoolCal===undefined)se.showSchoolCal=true;
+  se.defRem=se.defRem||{};
+  Object.keys(DEF_REM).forEach(function(k){if(!se.defRem[k])se.defRem[k]=clone(DEF_REM[k]);});
+  (st.events||[]).forEach(function(e){
+    if(Array.isArray(e.reminders))e.reminders=e.reminders.map(function(r){return typeof r==="number"?(OLD_REM[r]?clone(OLD_REM[r]):{n:r,u:"m"}):r;});
+    else e.reminders=[];
+    if(e.repeat===undefined)e.repeat="";
+  });
+  ensureCollections(st);
+  st.v=2;return st;
+}
+function load(){
+  var raw=null;try{raw=localStorage.getItem(KEY);}catch(e){}
+  if(raw){try{S=JSON.parse(raw);}catch(e){S=null;}}
+  if(!S||!S.v){
+    S=blank();
+    if(window.SEED){S.teachers=SEED.teachers;S.schools=SEED.schools;S.events=SEED.events;S.settings.seeded=true;}
+  }
+  migrate(S);autoComplete();save(true);
+}
+function save(quiet){
+  try{localStorage.setItem(KEY,JSON.stringify(S));if(typeof schedulePush==="function")schedulePush();return true;}
+  catch(e){if(!quiet)toast("تعذّر الحفظ على هذا الجهاز. خذ نسخة احتياطية الآن.");return false;}
+}
+try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+
+function school(id){return S.schools.find(function(s){return s.id===id;});}
+function teacher(id){return S.teachers.find(function(t){return t.id===id;});}
+function evById(id){return S.events.find(function(e){return e.id===id;});}
+function schoolName(id){var s=school(id);return s?s.name:"";}
+function sortEv(a,b){return (a.date||"").localeCompare(b.date||"")||(a.start||"99").localeCompare(b.start||"99");}
+function typeOf(e){return e.sc?SC_TYPES[e.type]:(TYPES[e.type]||TYPES.other);}
+function evTitle(e){
+  if(e.sc)return e.title;
+  var t=typeOf(e);
+  if(e.title&&e.title!==t.name)return e.title;
+  if(e.type==="class"&&e.teacherIds&&e.teacherIds.length){var tt=teacher(e.teacherIds[0]);if(tt)return t.name+": "+tt.name;}
+  if(e.schoolId)return t.name+": "+schoolName(e.schoolId);
+  return t.name;
+}
+function inScope(e){var sc=S.settings.scope;if(e.sc)return sc!=="life"||e.type==="holiday";if(sc==="all")return true;return (sc==="work")===isWork(e.type);}
+
+/* ============ التقويم الدراسي ============ */
+function holidayOn(date){for(var i=0;i<SCHOOL_CAL.length;i++){var h=SCHOOL_CAL[i];if(h.type==="holiday"&&date>=h.date&&date<=h.to)return h;}return null;}
+function scItems(from,to){
+  if(!S.settings.showSchoolCal)return [];
+  return SCHOOL_CAL.filter(function(h){return h.to>=from&&h.date<=to;});
+}
+
+/* ============ التكرار ============ */
+function stepDate(d,freq,k,origDay){
+  var x=parseISO(d);
+  if(freq==="daily")x.setDate(x.getDate()+k);
+  else if(freq==="weekly")x.setDate(x.getDate()+7*k);
+  else if(freq==="monthly"||freq==="yearly"){
+    var base=parseISO(d);var m=base.getMonth()+(freq==="monthly"?k:12*k);
+    x=new Date(base.getFullYear(),m,1);var last=new Date(x.getFullYear(),x.getMonth()+1,0).getDate();
+    if(origDay>last)return null; x.setDate(origDay);
+  }
+  return iso(x);
+}
+function occurrences(e,from,to){
+  if(!e.date)return [];
+  if(!e.repeat){return e.date>=from&&e.date<=to?[e]:[];}
+  var out=[],od=parseISO(e.date).getDate(),end=e.until&&e.until<to?e.until:to;
+  for(var k=0;k<800;k++){
+    var d=stepDate(e.date,e.repeat,k,od);
+    if(d===null)continue;
+    if(d>end)break;
+    if(d>=from){var o=Object.assign({},e,{date:d,_occ:true,_master:e.id});out.push(o);}
+  }
+  return out;
+}
+function itemsBetween(from,to,opts){
+  opts=opts||{};
+  var out=[];
+  S.events.forEach(function(e){if(!inScope(e))return;if(opts.type&&e.type!==opts.type)return;out=out.concat(occurrences(e,from,to));});
+  if(!opts.type&&opts.withSC!==false)scItems(from,to).forEach(function(h){if(inScope(h))out.push(h);});
+  return out.sort(sortEv);
+}
+
+/* ============ التنبيهات ============ */
+function evStart(e){var d=parseISO(e.date);if(e.start){var p=e.start.split(":");d.setHours(+p[0],+p[1],0,0);}return d;}
+function alarmTime(e,r){
+  var base=parseISO(e.date),d;
+  if(r.k==="abs"){if(!r.at)return null;var q=r.at.split("T"),dd=parseISO(q[0]),tp=(q[1]||"07:00").split(":");dd.setHours(+tp[0],+tp[1],0,0);return dd;}
+  var n=+r.n||0;
+  if(r.u==="d"){
+    d=new Date(base);d.setDate(d.getDate()-n);
+    var at=r.at||(e.start?e.start:"19:00");if(!r.at&&!e.start&&n===0)at="07:00";
+    var p=at.split(":");d.setHours(+p[0],+p[1],0,0);return d;
+  }
+  var ref=e.start?evStart(e):(function(){var x=new Date(base);x.setHours(7,0,0,0);return x;})();
+  return new Date(ref.getTime()-n*(r.u==="h"?3600e3:60e3));
+}
+function remLabel(r){
+  if(r.k==="abs")return "في "+(r.at?fmtDate(r.at.split("T")[0],true)+" "+fmtTime(r.at.split("T")[1]):"وقت محدد");
+  var s=r.u==="d"&&+r.n===0?"في نفس اليوم":"قبل "+r.n+" "+UNITS[r.u];
+  if(r.u==="d"&&r.at)s+=" الساعة "+fmtTime(r.at);
+  return s;
+}
+function fmtAlarm(d){return AR_DAYS[d.getDay()]+" "+d.getDate()+" "+AR_MONTHS[d.getMonth()]+" — "+fmtTime(pad(d.getHours())+":"+pad(d.getMinutes()));}
+
+/* ============ ملفات التقويم (ics) ============ */
+function icsEsc(s){return String(s||"").replace(/\\/g,"\\\\").replace(/;/g,"\\;").replace(/,/g,"\\,").replace(/\r?\n/g,"\\n");}
+function fold(line){
+  var out=[],cur="",bytes=0,enc=new TextEncoder();
+  for(var ch of line){var b=enc.encode(ch).length;if(bytes+b>73){out.push(cur);cur=" "+ch;bytes=1+b;}else{cur+=ch;bytes+=b;}}
+  out.push(cur);return out.join("\r\n");
+}
+function icsDT(date,time){return date.replace(/-/g,"")+"T"+time.replace(":","")+"00";}
+function veventLines(e){
+  var L=[],now=new Date();
+  var stamp=now.getUTCFullYear()+pad(now.getUTCMonth()+1)+pad(now.getUTCDate())+"T"+pad(now.getUTCHours())+pad(now.getUTCMinutes())+"00Z";
+  L.push("BEGIN:VEVENT","UID:"+e.id+"@msa","DTSTAMP:"+stamp);
+  var endDate=e.to||e.date;
+  if(e.start){
+    L.push("DTSTART:"+icsDT(e.date,e.start));
+    var end=e.end||(function(){var p=e.start.split(":");var h=Math.min(23,+p[0]+1);return pad(h)+":"+p[1];})();
+    L.push("DTEND:"+icsDT(e.date,end));
+  }else{
+    L.push("DTSTART;VALUE=DATE:"+e.date.replace(/-/g,""),"DTEND;VALUE=DATE:"+addDays(endDate,1).replace(/-/g,""));
+  }
+  if(e.repeat){
+    var rr="RRULE:FREQ="+{daily:"DAILY",weekly:"WEEKLY",monthly:"MONTHLY",yearly:"YEARLY"}[e.repeat];
+    if(e.until)rr+=";UNTIL="+e.until.replace(/-/g,"")+(e.start?"T235959":"");
+    L.push(rr);
+  }
+  L.push("SUMMARY:"+icsEsc(evTitle(e)));
+  var loc=e.place||(e.schoolId?"مدرسة "+schoolName(e.schoolId):"");
+  if(loc)L.push("LOCATION:"+icsEsc(loc));
+  var desc=[];
+  if(e.teacherIds&&e.teacherIds.length)desc.push("المعلمون: "+e.teacherIds.map(function(id){var t=teacher(id);return t?t.name:"";}).join("، "));
+  if(e.notes)desc.push(e.notes);
+  desc.push("من برنامج المساعد الشخصي");
+  L.push("DESCRIPTION:"+icsEsc(desc.join("\n")));
+  var start=evStart(e),seen={};
+  (e.reminders||[]).forEach(function(r){
+    var a=alarmTime(e,r);if(!a)return;
+    var mins=Math.round((a-start)/60000);
+    var t=mins<=0?"-PT"+(-mins)+"M":"PT"+mins+"M";if(mins===0)t="PT0M";
+    if(seen[t])return;seen[t]=1;
+    L.push("BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+icsEsc(evTitle(e)),"TRIGGER:"+t,"END:VALARM");
+  });
+  L.push("END:VEVENT");
+  return L;
+}
+function buildICS(list){
+  var L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//MSA//Supervisor Assistant//AR","CALSCALE:GREGORIAN","METHOD:PUBLISH"];
+  list.forEach(function(e){L=L.concat(veventLines(e));});
+  L.push("END:VCALENDAR");
+  return L.map(fold).join("\r\n")+"\r\n";
+}
+function deliverFile(text,name,mime){
+  var blob=new Blob([text],{type:mime});
+  if(isIOS()&&mime.indexOf("calendar")>-1){
+    var u=URL.createObjectURL(blob);window.location.href=u;setTimeout(function(){URL.revokeObjectURL(u);},60000);return;
+  }
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},2000);
+}
+function addToCalendar(ids){
+  var list=ids.map(evById).filter(function(e){return e&&e.date;});
+  if(!list.length){toast("لا توجد مواعيد بتاريخ لإضافتها");return;}
+  deliverFile(buildICS(list),list.length===1?"موعد.ics":"مواعيد.ics","text/calendar;charset=utf-8");
+  list.forEach(function(e){e.inCalendar=true;});save();
+}
+function addSchoolCalToCalendar(ids){
+  var rem=S.settings.defRem.holiday||[];
+  var list=SCHOOL_CAL.filter(function(h){return ids.indexOf(h.id)>-1;}).map(function(h){
+    return {id:"msa-"+h.id+"-2627",date:h.date,to:h.to,title:(h.type==="holiday"?"🏖️ ":"📚 ")+h.title,notes:"التقويم الدراسي 2026/2027م — وزارة التعليم",reminders:h.type==="holiday"?clone(rem):[],teacherIds:[]};
+  });
+  if(!list.length)return;
+  deliverFile(buildICS(list),"التقويم_الدراسي.ics","text/calendar;charset=utf-8");
+  S.settings.scInCal=S.settings.scInCal||{};ids.forEach(function(i){S.settings.scInCal[i]=1;});save();
+}
+function gcalLink(e){
+  var dates=e.start?icsDT(e.date,e.start)+"/"+icsDT(e.date,e.end||e.start):e.date.replace(/-/g,"")+"/"+addDays(e.date,1).replace(/-/g,"");
+  var loc=e.place||(e.schoolId?"مدرسة "+schoolName(e.schoolId):"");
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE&text="+encodeURIComponent(evTitle(e))+"&dates="+dates+"&location="+encodeURIComponent(loc)+"&details="+encodeURIComponent(e.notes||"");
+}
+
+/* ============ مكونات العرض ============ */
+function evCard(e,opts){
+  opts=opts||{};
+  var t=typeOf(e),d=e.date?parseISO(e.date):null;
+  var when=opts.timeOnly?(e.start?"<b>"+esc(fmtTime(e.start).split(" ")[0])+"</b>"+esc(fmtTime(e.start).split(" ")[1]):"<b>—</b>اليوم")
+    :(d?"<b>"+d.getDate()+"</b>"+AR_MONTHS[d.getMonth()]:"<b>؟</b>");
+  var meta=[];
+  if(e.sc){
+    if(e.to&&e.to!==e.date)meta.push(fmtRange(e.date,e.to)+" ("+(daysBetween(e.date,e.to)+1)+" أيام)");
+    return '<div class="ev" style="--tc:'+t.c+'" data-sc="'+esc(e.id)+'"><div class="when">'+when+'</div><div class="body"><div class="ttl">'+(e.type==="holiday"?"🏖️ ":"📚 ")+esc(e.title)+
+      '</div><div class="meta"><span class="tag type">'+t.name+"</span> "+esc(meta.join(" · "))+"</div></div></div>";
+  }
+  if(!opts.timeOnly&&e.start)meta.push(fmtTime(e.start));
+  if(e.schoolId&&evTitle(e).indexOf(schoolName(e.schoolId))<0)meta.push("🏫 "+schoolName(e.schoolId));
+  if(e.place)meta.push("📍 "+e.place);
+  if(e.type!=="class"&&e.teacherIds&&e.teacherIds.length)meta.push("👤 "+e.teacherIds.length+" معلم");
+  var st=e.status&&e.status!=="planned"&&!e.repeat?'<span class="tag '+e.status+'">'+STATUS[e.status]+(e.autoDone?" (تلقائي)":"")+(e.reschedTo&&evById(e.reschedTo)?" ← "+fmtShort(evById(e.reschedTo).date):"")+"</span>":"";
+  var rep=e.repeat?'<span class="tag rep">🔁 '+REPEAT[e.repeat]+"</span>":"";
+  var cal=e.inCalendar&&(e.status==="planned"||e.repeat)?'<span class="tag">🔔 في التقويم</span>':"";
+  var hol=!e.sc&&e.date&&holidayOn(e.date)&&isWork(e.type)&&e.status==="planned"?'<div class="warnline">⚠️ هذا اليوم إجازة: '+esc(holidayOn(e.date).title)+"</div>":"";
+  var id=e._master||e.id;
+  return '<div class="ev" style="--tc:'+t.c+'" data-ev="'+esc(id)+'"><div class="when">'+when+'</div><div class="body">'+
+    '<div class="ttl">'+esc(evTitle(e))+'</div><div class="meta"><span class="tag type">'+t.name+"</span>"+st+rep+cal+" "+esc(meta.join(" · "))+"</div>"+hol+
+    (opts.actions?'<div class="sheet-actions">'+opts.actions(e)+"</div>":"")+"</div></div>";
+}
+function bindEvCards(root){
+  root.querySelectorAll("[data-ev]").forEach(function(el){
+    el.addEventListener("click",function(ev){if(ev.target.closest("button,a"))return;openEvent(el.getAttribute("data-ev"));});
+  });
+  root.querySelectorAll("[data-sc]").forEach(function(el){el.addEventListener("click",function(){location.hash="#schoolcal";});});
+  root.querySelectorAll("[data-st]").forEach(function(b){
+    b.addEventListener("click",function(ev){
+      ev.stopPropagation();var e=evById(b.getAttribute("data-id"));if(!e)return;var st=b.getAttribute("data-st");
+      if(e.status===st&&st!=="postponed"){e.status=e.date>=todayISO()&&evEndTime(e)>new Date()?"planned":st;}
+      else e.status=st;
+      e.autoDone=false;save();
+      var msg={done:"✅ تم التنفيذ",missed:"❌ لم يتم",postponed:"⏸️ مؤجل",cancelled:"🚫 ملغي",planned:"🕓 رجع مخطط"}[e.status];
+      toast(msg);render();
+      if(st==="postponed"&&!e.reschedTo&&confirm("تحدد الموعد الجديد الحين؟"))openEvent(e.id,{resched:true});
+    });
+  });
+  root.querySelectorAll("[data-act]").forEach(function(b){
+    b.addEventListener("click",function(ev){
+      ev.stopPropagation();var id=b.getAttribute("data-id"),a=b.getAttribute("data-act"),e=evById(id);
+      if(!e)return;
+      if(a==="done"){e.status="done";e.autoDone=false;save();toast("تم تسجيل التنفيذ ✓");render();}
+      if(a==="cal")addToCalendar([id]);
+      if(a==="resched")openEvent(id,{resched:true});
+    });
+  });
+}
+function quickActions(e){
+  if(e.sc)return "";
+  var id=esc(e._master||e.id),h="";
+  if(!e.repeat){
+    h+='<div class="stbar">'+ST_BTNS.map(function(b){return '<button type="button" class="st'+(e.status===b[0]?" on st-"+b[0]:"")+'" data-st="'+b[0]+'" data-id="'+id+'" title="'+b[2]+'"><span>'+b[1]+"</span>"+b[2]+"</button>";}).join("")+"</div>";
+    if((e.status==="missed"||e.status==="postponed")&&!e.reschedTo)h+='<button class="btn sm" data-act="resched" data-id="'+id+'">↻ حدد موعدًا جديدًا</button>';
+  }
+  if((e.status==="planned"||e.repeat)&&!e.inCalendar&&(e.repeat||e.date>=todayISO()))h+='<button class="btn sm" data-act="cal" data-id="'+id+'">🔔 أضف للتقويم</button>';
+  return h;
+}
+function scopeBar(){
+  var sc=S.settings.scope;
+  return '<div class="scope">'+[["all","الكل"],["work","💼 العمل"],["life","🏡 حياتي"]].map(function(x){return '<button data-scope="'+x[0]+'"'+(sc===x[0]?' class="on"':"")+">"+x[1]+"</button>";}).join("")+"</div>";
+}
+function bindScope(){
+  $("view").querySelectorAll("[data-scope]").forEach(function(b){b.onclick=function(){S.settings.scope=b.dataset.scope;save(true);render();};});
+}
+
+/* ============ الشاشات ============ */
+var route="today",param=null,evView={mode:"month",filter:"upcoming",type:"",month:null,sel:null},tFilter={q:"",w:""};
+
+function viewToday(){
+  var t=todayISO(),wk=addDays(t,7);
+  if(!S.teachers.length&&!S.events.length&&!S.settings.startedEmpty){
+    $("view").innerHTML='<div class="card" style="text-align:center;padding:26px 18px"><div style="font-size:44px">👋</div><h3>أهلًا بك في المساعد الشخصي</h3>'+
+      '<p>للبدء، استورد ملف بياناتك (<b>بياناتي_الأولى_مساعد_المشرف.json</b>) أو أي نسخة احتياطية.</p>'+
+      '<button class="btn pri" id="firstImport">📂 استيراد ملف البيانات</button><p><button class="btn" id="startEmpty">ابدأ بدون بيانات</button></p><p class="small" style="margin-top:14px">بياناتك تُحفظ على هذا الجهاز فقط، ولا تُرفع على الإنترنت.</p></div>';
+    $("firstImport").onclick=function(){$("importFile").click();};
+    $("startEmpty").onclick=function(){S.settings.startedEmpty=true;save();render();};
+    return;
+  }
+  var today=itemsBetween(t,t).filter(function(e){return e.status!=="cancelled";});
+  var soon=itemsBetween(addDays(t,1),wk).filter(function(e){return e.sc||e.status==="planned"||e.repeat;});
+  autoComplete();
+  var missed=S.events.filter(function(e){return inScope(e)&&!e.repeat&&e.date&&(e.status==="missed"||e.status==="postponed")&&!e.reschedTo;}).sort(sortEv);
+  var doneClass=S.events.filter(function(e){return e.type==="class"&&e.status==="done"&&e.date>="2026-08-01";}).length;
+  var h=scopeBar();
+  var lb=S.settings.lastBackup,days=lb?Math.floor((Date.now()-new Date(lb).getTime())/864e5):null;
+  if(days===null||days>=7)h+='<div class="banner">💾 '+(days===null?"لم تأخذ نسخة احتياطية بعد.":"آخر نسخة احتياطية قبل "+days+" يوم.")+' <a href="#backup">خذ نسخة الآن</a></div>';
+  // الإجازة القادمة
+  var hol=holidayOn(t);
+  var next=SCHOOL_CAL.filter(function(x){return x.type==="holiday"&&x.date>t;}).sort(sortEv)[0];
+  if(S.settings.showSchoolCal){
+    if(hol)h+='<div class="holiday-card">🏖️ <div>اليوم إجازة: <b>'+esc(hol.title)+"</b>"+(hol.to!==t?" (حتى "+fmtShort(hol.to)+")":"")+"</div></div>";
+    else if(next){var dn=daysBetween(t,next.date);h+='<div class="holiday-card" data-go="schoolcal" style="cursor:pointer">🏖️ <div>الإجازة الرسمية القادمة: <b>'+esc(next.title)+"</b> — "+fmtRange(next.date,next.to)+" · "+(dn===1?"بكرة":"بعد "+dn+" يوم")+"</div></div>";}
+  }
+  h+='<div class="stats">'+
+    '<div class="stat"><b>'+today.filter(function(e){return !e.sc;}).length+'</b><span>مواعيد اليوم</span></div>'+
+    '<div class="stat"><b>'+soon.filter(function(e){return !e.sc;}).length+'</b><span>خلال 7 أيام</span></div>'+
+    '<div class="stat'+(missed.length?" warn":"")+'"><b>'+missed.length+'</b><span>تحتاج قرار</span></div>'+
+    (S.settings.scope==="life"?'<div class="stat"><b>'+S.events.filter(function(e){return e.repeat&&!isWork(e.type);}).length+'</b><span>مواعيد متكررة</span></div>':
+    '<div class="stat"><b>'+doneClass+'</b><span>زيارة صفية هذا العام</span></div>')+"</div>";
+  h+='<div class="bigacts"><button class="bigact a" id="bNew"><span class="bi">➕</span><span><b>موعد جديد</b>عمل أو شخصي</span></button><a class="bigact b" href="#plan" id="bPlan"><span class="bi">🗓️</span><span><b>خطتي الشهرية</b>ابنِ خطة شهرك</span></a></div>';
+  h+='<h2>📌 اليوم <span class="count">'+today.length+"</span></h2>";
+  h+=today.length?today.map(function(e){return evCard(e,{timeOnly:true,actions:quickActions});}).join(""):'<div class="empty">لا توجد مواعيد اليوم</div>';
+  h+='<h2>🗓️ خلال الأيام السبعة القادمة <span class="count">'+soon.length+"</span></h2>";
+  h+=soon.length?soon.map(function(e){return evCard(e,{actions:quickActions});}).join(""):'<div class="empty">لا توجد مواعيد قادمة هذا الأسبوع</div>';
+  var notIn=soon.filter(function(e){return !e.sc&&!e.inCalendar;});
+  if(notIn.length)h+='<div class="row" style="margin-top:6px"><button class="btn" id="calWeek">🔔 أضف مواعيد الأسبوع ('+notIn.length+') للتقويم</button></div>';
+  var dueT=S.settings.scope==="life"?[]:S.tasks.filter(function(k){return !k.done&&(!k.due||k.due<=wk);}).sort(function(a,b){return (a.due||"").localeCompare(b.due||"");});
+  if(dueT.length){h+='<h2>🔁 متابعات مستحقة <span class="count">'+dueT.length+"</span></h2>"+dueT.map(taskCard).join("");}
+  if(missed.length){
+    h+='<h2>⚠️ تحتاج موعدًا جديدًا <span class="count">'+missed.length+"</span></h2>";
+    h+='<p class="small">مواعيد «لم يتم» أو «مؤجل» بدون موعد بديل. حدد لها موعدًا جديدًا، أو غيّر حالتها.</p>';
+    h+=missed.map(function(e){return evCard(e,{actions:quickActions});}).join("");
+  }
+  $("view").innerHTML=h;bindEvCards($("view"));bindScope();bindTasks($("view"));
+  $("bNew").onclick=function(){openEvent(null,{});};
+  $("bPlan").onclick=function(){evView.mode="build";evView.month=null;};
+  $("view").querySelectorAll("[data-go]").forEach(function(b){b.onclick=function(){location.hash="#"+b.dataset.go;};});
+  var cw=$("calWeek");if(cw)cw.onclick=function(){var ids={};notIn.forEach(function(e){ids[e._master||e.id]=1;});addToCalendar(Object.keys(ids));};
+}
+
+function viewEvents(){
+  /* خطتي الشهرية: الشهر / بناء الخطة / قائمة */
+  var t=todayISO(),f=evView;
+  if(["month","build","list"].indexOf(f.mode)<0)f.mode="month";
+  var types=Object.keys(TYPES).filter(function(k){var g=TYPES[k].g,sc=S.settings.scope;return sc==="all"||(sc==="work")===(g==="work");});
+  if(f.type&&types.indexOf(f.type)<0)f.type="";
+  var base=f.month?parseISO(f.month+"-01"):new Date();base=new Date(base.getFullYear(),base.getMonth(),1);
+  var mKey=base.getFullYear()+"-"+pad(base.getMonth()+1);f.month=mKey;
+  var mStart=iso(base),mEnd=iso(new Date(base.getFullYear(),base.getMonth()+1,0));
+  var h=scopeBar();
+  h+='<div class="chips" style="padding-top:0">'+[["month","🗓️ الشهر"],["build","📝 بناء الخطة"],["list","📋 القائمة"]].map(function(x){return '<button class="chip'+(f.mode===x[0]?" on":"")+'" data-mode="'+x[0]+'">'+x[1]+"</button>";}).join("")+"</div>";
+  if(f.mode!=="list"){
+    h+='<div class="plan-head"><button class="btn sm" data-mv="-1">‹ السابق</button><b>'+AR_MONTHS[base.getMonth()]+" "+base.getFullYear()+'</b><button class="btn sm" data-mv="1">التالي ›</button></div>';
+    var mItems=itemsBetween(mStart,mEnd);
+    var nW=mItems.filter(function(e){return !e.sc&&isWork(e.type);}).length,nL=mItems.filter(function(e){return !e.sc&&!isWork(e.type);}).length;
+    var nH=0;for(var dd0=parseISO(mStart);iso(dd0)<=mEnd;dd0.setDate(dd0.getDate()+1)){if(holidayOn(iso(dd0)))nH++;}
+    h+='<div class="msum">'+(S.settings.scope!=="life"?"<span>💼 عمل: <b>"+nW+"</b></span>":"")+(S.settings.scope!=="work"?"<span>🏡 حياتي: <b>"+nL+"</b></span>":"")+(nH?"<span>🏖️ أيام إجازة: <b>"+nH+"</b></span>":"")+
+      '<span style="cursor:pointer" id="printPlan">🖨️ طباعة الخطة</span></div>';
+  }
+  if(f.mode==="build"){
+    h+='<p class="small" style="margin-top:0">اضغط <b>+</b> جنب أي يوم وأضف موعدك مباشرة. اضغط على أي موعد لتعديله أو تغيير حالته.</p>';
+    for(var d=parseISO(mStart);iso(d)<=mEnd;d.setDate(d.getDate()+1)){
+      var k=iso(d),hl=S.settings.showSchoolCal?holidayOn(k):null,wk=d.getDay()===5||d.getDay()===6;
+      var its=itemsBetween(k,k,{withSC:false}).filter(function(e){return !f.type||e.type===f.type;});
+      var scs=S.settings.showSchoolCal?SCHOOL_CAL.filter(function(x){return x.type==="schoolev"&&k>=x.date&&k<=x.to&&x.date===k;}):[];
+      h+='<div class="dayrow'+(hl?" hol":"")+(k===t?" today":"")+(wk?" wkend":"")+'" id="day-'+k+'"><div class="dhead"><div class="dnum">'+d.getDate()+'</div><div class="dname">'+AR_DAYS[d.getDay()]+
+        (hl?' <span class="tag missed">🏖️ '+esc(hl.title)+"</span>":"")+scs.map(function(x){return ' <span class="tag">📚 '+esc(x.title)+"</span>";}).join("")+
+        '</div><button class="addday" data-addday="'+k+'" aria-label="أضف موعدًا">+</button></div>'+
+        its.map(function(e){var tp=typeOf(e);return '<div class="mini" style="--tc:'+tp.c+'" data-ev="'+esc(e._master||e.id)+'"><span class="tm">'+(e.start?fmtTime(e.start):"طوال اليوم")+"</span><span>"+esc(evTitle(e))+'</span><span class="st-ic">'+
+          (e.repeat?"🔁":e.status==="done"?"✅":e.status==="missed"?"❌":e.status==="postponed"?"⏸️":e.status==="cancelled"?"🚫":"")+"</span></div>";}).join("")+
+        (f.openDay===k?quickAddForm(k):"")+"</div>";
+    }
+  }else if(f.mode==="month"){
+    h+='<div class="cal">'+["أحد","إثنين","ثلاثاء","أربعاء","خميس","جمعة","سبت"].map(function(x){return '<div class="dow">'+x+"</div>";}).join("");
+    var start=new Date(base);start.setDate(1-base.getDay());
+    var gridEnd=new Date(start);gridEnd.setDate(start.getDate()+41);
+    var all=itemsBetween(iso(start),iso(gridEnd),{type:f.type});
+    for(var i=0;i<42;i++){
+      var dd=new Date(start);dd.setDate(start.getDate()+i);var kk=iso(dd);
+      if(i>=35&&dd.getMonth()!==base.getMonth())break;
+      var de=all.filter(function(e){return !e.sc&&e.date===kk&&e.status!=="cancelled";});
+      var hh=S.settings.showSchoolCal?holidayOn(kk):null;
+      h+='<div class="d'+(dd.getMonth()!==base.getMonth()?" out":"")+(kk===t?" today":"")+(kk===f.sel?" sel":"")+(hh?" hol":"")+'" data-day="'+kk+'">'+dd.getDate()+
+        (hh?'<span class="hn">'+esc(hh.title.replace("إجازة ",""))+"</span>":"")+
+        '<div class="dots">'+de.slice(0,6).map(function(e){return '<i style="--tc:'+typeOf(e).c+'"></i>';}).join("")+"</div></div>";
+    }
+    h+="</div>";
+    var sel=f.sel||(t>=mStart&&t<=mEnd?t:mStart);
+    var se=itemsBetween(sel,sel,{type:f.type}).filter(function(e){return !e.sc;});
+    var scDay=S.settings.showSchoolCal&&!f.type?SCHOOL_CAL.filter(function(x){return sel>=x.date&&sel<=x.to;}):[];
+    se=se.concat(scDay);
+    h+='<div class="row" style="justify-content:space-between;align-items:center"><h2>'+fmtDate(sel,true)+' <span class="count">'+se.length+'</span></h2><button class="btn sm pri" id="addOnDay">+ أضف في هذا اليوم</button></div>';
+    h+=se.length?se.map(function(e){return evCard(e,{timeOnly:true,actions:quickActions});}).join(""):'<div class="empty">لا مواعيد في هذا اليوم</div>';
+    if(MUSIC_ASSESS[mKey]&&S.settings.scope!=="life")h+='<h2>🎵 تقويم المهارات الموسيقية هذا الشهر</h2><div class="card">'+MUSIC_ASSESS[mKey].map(function(x){return "<div><b>الصفوف "+x[0]+":</b> "+esc(x[1])+"</div>";}).join("")+"</div>";
+  }else{
+    h+='<div class="chips" style="padding-top:0">'+[["","كل الأنواع"]].concat(types.map(function(k){return [k,TYPES[k].name];})).map(function(x){return '<button class="chip'+(f.type===x[0]?" on":"")+'" data-type="'+x[0]+'">'+x[1]+"</button>";}).join("")+"</div>";
+    h+='<div class="chips" style="padding-top:0">'+[["upcoming","القادمة"],["past","السابقة"],["repeat","🔁 المتكررة"]].map(function(x){return '<button class="chip'+(f.filter===x[0]?" on":"")+'" data-filter="'+x[0]+'">'+x[1]+"</button>";}).join("")+"</div>";
+    var list;
+    if(f.filter==="upcoming")list=itemsBetween(t,addDays(t,120),{type:f.type});
+    else if(f.filter==="past")list=itemsBetween("2000-01-01",addDays(t,-1),{type:f.type}).filter(function(e){return !e._occ;}).reverse();
+    else list=S.events.filter(function(e){return e.repeat&&inScope(e)&&(!f.type||e.type===f.type);}).sort(sortEv);
+    if(!list.length)h+='<div class="empty">'+(f.filter==="repeat"?"لا توجد مواعيد متكررة.":"لا توجد مواعيد")+"</div>";
+    var lastM="";
+    list.forEach(function(e){
+      if(f.filter!=="repeat"){var dm=parseISO(e.date),m=AR_MONTHS[dm.getMonth()]+" "+dm.getFullYear();if(m!==lastM){h+="<h2>"+m+"</h2>";lastM=m;}}
+      h+=evCard(e,{actions:quickActions});
+    });
+    if(f.filter==="upcoming"){var ids={};list.forEach(function(e){if(!e.sc&&!e.inCalendar&&(e.status==="planned"||e.repeat))ids[e._master||e.id]=1;});var n=Object.keys(ids).length;
+      if(n)h+='<div class="row" style="margin-top:10px"><button class="btn" id="calAll">🔔 أضف '+n+" موعد قادم للتقويم</button></div>";
+      f._calIds=Object.keys(ids);}
+  }
+  $("view").innerHTML=h;bindEvCards($("view"));bindScope();
+  var V=$("view");
+  V.querySelectorAll("[data-mode]").forEach(function(b){b.onclick=function(){f.mode=b.dataset.mode;f.openDay=null;render();};});
+  V.querySelectorAll("[data-type]").forEach(function(b){b.onclick=function(){f.type=b.dataset.type;render();};});
+  V.querySelectorAll("[data-filter]").forEach(function(b){b.onclick=function(){f.filter=b.dataset.filter;render();};});
+  V.querySelectorAll("[data-mv]").forEach(function(b){b.onclick=function(){var dm=parseISO(f.month+"-01");dm.setMonth(dm.getMonth()+ +b.dataset.mv);f.month=dm.getFullYear()+"-"+pad(dm.getMonth()+1);f.sel=null;f.openDay=null;render();};});
+  V.querySelectorAll("[data-day]").forEach(function(b){b.onclick=function(){f.sel=b.dataset.day;render();};});
+  V.querySelectorAll("[data-addday]").forEach(function(b){b.onclick=function(){f.openDay=f.openDay===b.dataset.addday?null:b.dataset.addday;render();var r=$("day-"+b.dataset.addday);if(r){r.scrollIntoView({block:"center"});var i=$("qaT");if(i)i.focus();}};});
+  var ca=$("calAll");if(ca)ca.onclick=function(){addToCalendar(f._calIds||[]);};
+  var ad=$("addOnDay");if(ad)ad.onclick=function(){openEvent(null,{date:f.sel||(t>=mStart&&t<=mEnd?t:mStart)});};
+  var pp=$("printPlan");if(pp)pp.onclick=function(){printPlan(mStart,mEnd);};
+  bindQuickAdd();
+}
+function quickAddForm(k){
+  var def=S.settings.scope==="work"?"school":"personal";
+  var opt=function(g,lbl){return '<optgroup label="'+lbl+'">'+Object.keys(TYPES).filter(function(x){return TYPES[x].g===g;}).map(function(x){return '<option value="'+x+'"'+(x===def?" selected":"")+">"+TYPES[x].name+"</option>";}).join("")+"</optgroup>";};
+  return '<div class="qa" data-qa="'+k+'"><input id="qaT" placeholder="اكتب الموعد… مثلًا: زيارة مدرسة الجزع"><div class="r"><input type="time" id="qaTime" aria-label="الساعة"><select id="qaType">'+
+    (S.settings.scope==="work"?opt("work","💼 العمل")+opt("life","🏡 حياتي"):opt("life","🏡 حياتي")+opt("work","💼 العمل"))+
+    '</select></div><div class="row"><button class="btn pri sm" id="qaSave">💾 حفظ</button><button class="btn sm" id="qaMore">تفاصيل وتنبيهات…</button><button class="btn sm" id="qaClose">إغلاق</button></div>'+
+    '<p class="small" style="margin:6px 0 0">الساعة فاضية = طوال اليوم. التنبيهات تنحط تلقائيًا حسب النوع، وتقدر تغيّرها من «تفاصيل وتنبيهات».</p></div>';
+}
+function bindQuickAdd(){
+  var box=document.querySelector("[data-qa]");if(!box)return;
+  var k=box.getAttribute("data-qa");
+  function build(){var ty=$("qaType").value,ti=$("qaT").value.trim();
+    return {id:uid("e"),type:ty,title:ti||TYPES[ty].name,date:k,start:$("qaTime").value,end:"",schoolId:"",teacherIds:[],place:"",notes:"",status:"planned",repeat:"",until:"",reminders:clone(S.settings.defRem[ty]||[])};}
+  $("qaSave").onclick=function(){var e=build();if(!$("qaT").value.trim()&&!TYPES[e.type].edu){toast("اكتب الموعد");$("qaT").focus();return;}
+    var hl=holidayOn(k);if(hl&&isWork(e.type)&&!confirm(fmtDate(k)+" إجازة رسمية ("+hl.title+"). تحفظ الموعد؟"))return;
+    S.events.push(e);save();toast("تمت الإضافة ✓");evView.openDay=null;render();var r=$("day-"+k);if(r)r.scrollIntoView({block:"center"});};
+  $("qaMore").onclick=function(){var e=build();evView.openDay=null;openEvent(null,{date:k,type:e.type,title:$("qaT").value.trim(),start:e.start});};
+  $("qaClose").onclick=function(){evView.openDay=null;render();};
+  $("qaT").addEventListener("keydown",function(ev){if(ev.key==="Enter")$("qaSave").click();});
+}
+function printPlan(from,to){
+  var rows="",d=parseISO(from);
+  for(;iso(d)<=to;d.setDate(d.getDate()+1)){
+    var k=iso(d),hl=S.settings.showSchoolCal?holidayOn(k):null;
+    var its=itemsBetween(k,k,{withSC:false}).filter(function(e){return e.status!=="cancelled";});
+    rows+="<tr"+(hl?' style="background:#fdeceb"':"")+"><td>"+AR_DAYS[d.getDay()]+"</td><td>"+d.getDate()+"</td><td>"+(hl?"🏖️ "+esc(hl.title)+"<br>":"")+
+      its.map(function(e){return (e.start?"<b>"+fmtTime(e.start)+"</b> — ":"")+esc(evTitle(e))+(e.status==="done"?" ✔":"");}).join("<br>")+'</td><td style="width:22%"></td></tr>';
+  }
+  var dm=parseISO(from),sc={all:"العمل والحياة",work:"العمل",life:"حياتي"}[S.settings.scope];
+  var b='<table class="p-tbl p-plan"><tr><th>اليوم</th><th>التاريخ</th><th>المواعيد</th><th>ملاحظات</th></tr>'+rows+"</table>";
+  printDoc("خطتي الشهرية — "+AR_MONTHS[dm.getMonth()]+" "+dm.getFullYear(),b,(S.settings.supervisor?esc(S.settings.supervisor)+"<br>":"")+"الخطة: "+sc);
+}
+function viewWork(){
+  var openT=S.tasks.filter(function(t){return !t.done;}).length;
+  function tile(go,ic,t,m){return '<div class="list-item" data-go="'+go+'"><div class="avatar">'+ic+'</div><div class="body"><div class="ttl">'+t+'</div><div class="meta">'+m+"</div></div>‹</div>";}
+  var h='<h2 style="margin-top:4px">💼 العمل</h2>'+
+    tile("teachers","👨‍🏫","المعلمون",S.teachers.length+" معلم — بحث، اتصال، سجل الزيارات")+
+    tile("schools","🏫","المدارس",S.schools.length+" مدرسة — الزيارات المدرسية")+
+    tile("methods","🔄","أساليب الإشراف","الزيارة التبادلية ✓ — والباقي قريبًا")+
+    tile("tasks","🔁","المتابعات"+(openT?' <span class="count">'+openT+"</span>":""),"خطط التطبيق اللي تحتاج متابعة")+
+    tile("schoolcal","📚","التقويم الدراسي والإجازات","2026/2027م — أضف الإجازات لتقويم الموبايل");
+  h+="<h2>قريبًا</h2>"+[["🎓","الدورات والمشاغل","خطة الدورة، كشف الحضور، التقييم، الشهادات"],["📊","التقارير","شهري وفصلي، جاهزة للطباعة"],["🔗","ربط «جودة وأثر»","تفاصيل الزيارات الصفية"]]
+    .map(function(x){return '<div class="list-item soon"><div class="avatar">'+x[0]+'</div><div class="body"><div class="ttl">'+x[1]+' <span class="tag">قريبًا</span></div><div class="meta">'+x[2]+"</div></div></div>";}).join("");
+  $("view").innerHTML=h;
+  $("view").querySelectorAll("[data-go]").forEach(function(b){b.onclick=function(){location.hash="#"+b.dataset.go;};});
+}
+
+function lastVisit(tid){
+  var v=S.events.filter(function(e){return e.type==="class"&&e.status==="done"&&(e.teacherIds||[]).indexOf(tid)>-1;}).sort(sortEv);
+  return v.length?v[v.length-1]:null;
+}
+function wilayas(){var w={};S.schools.forEach(function(s){if(s.wilaya)w[s.wilaya]=1;});return Object.keys(w);}
+function viewTeachers(){
+  var q=tFilter.q.trim(),w=tFilter.w;
+  var list=S.teachers.filter(function(t){var s=school(t.schoolId)||{};
+    return (!w||s.wilaya===w)&&(!q||(t.name+" "+(s.name||"")+" "+t.fileNo).indexOf(q)>-1);})
+    .sort(function(a,b){return schoolName(a.schoolId).localeCompare(schoolName(b.schoolId),"ar")||a.name.localeCompare(b.name,"ar");});
+  var h='<a class="back" href="#work">› العمل</a><input class="search" id="tq" placeholder="🔍 ابحث باسم المعلم أو المدرسة أو رقم الملف" value="'+esc(q)+'">';
+  h+='<div class="chips">'+[""].concat(wilayas()).map(function(x){return '<button class="chip'+(w===x?" on":"")+'" data-w="'+esc(x)+'">'+(x||"كل الولايات")+"</button>";}).join("")+"</div>";
+  h+='<div class="row" style="justify-content:space-between;margin-bottom:8px"><span class="small">'+list.length+' معلم</span><button class="btn sm" id="addT">+ معلم جديد</button></div>';
+  h+=list.map(function(t){var lv=lastVisit(t.id),s=school(t.schoolId)||{};
+    return '<div class="list-item" data-t="'+esc(t.id)+'"><div class="avatar">'+esc(t.name.trim().charAt(0))+'</div><div class="body"><div class="ttl">'+esc(t.name)+
+      '</div><div class="meta">🏫 '+esc(s.name||"")+" · "+esc(s.wilaya||"")+(t.periods?" · "+t.periods+" حصة":"")+'</div><div class="meta">'+
+      (lv?"آخر زيارة صفية: "+fmtShort(lv.date):"لم يُزر بعد")+(t.status&&t.status!=="على رأس العمل"?' <span class="tag missed">'+esc(t.status)+"</span>":"")+"</div></div>‹</div>";}).join("")||'<div class="empty">لا نتائج</div>';
+  $("view").innerHTML=h;
+  var tq=$("tq");tq.oninput=function(){tFilter.q=tq.value;var pos=tq.selectionStart;viewTeachers();var n=$("tq");n.focus();n.setSelectionRange(pos,pos);};
+  $("view").querySelectorAll("[data-w]").forEach(function(b){b.onclick=function(){tFilter.w=b.dataset.w;render();};});
+  $("view").querySelectorAll("[data-t]").forEach(function(b){b.onclick=function(){location.hash="#teacher/"+encodeURIComponent(b.dataset.t);};});
+  $("addT").onclick=function(){openTeacher(null);};
+}
+function waLink(p){var d=String(p||"").replace(/\D/g,"");if(!d)return "";if(d.length===8)d="968"+d;return "https://wa.me/"+d;}
+function viewTeacher(id){
+  var t=teacher(id);if(!t){$("view").innerHTML='<div class="empty">المعلم غير موجود</div>';return;}
+  var s=school(t.schoolId)||{};
+  var ev=S.events.filter(function(e){return (e.teacherIds||[]).indexOf(id)>-1;}).sort(sortEv).reverse();
+  var cls=ev.filter(function(e){return e.type==="class"&&e.status==="done";});
+  var h='<a class="back" href="#teachers">› المعلمون</a>';
+  h+='<div class="card"><div class="row"><div class="avatar" style="width:54px;height:54px;font-size:22px">'+esc(t.name.trim().charAt(0))+'</div><div style="flex:1"><div style="font-size:19px;font-weight:700">'+esc(t.name)+
+    '</div><div class="small">🏫 <a href="#school/'+esc(s.id||"")+'">'+esc(s.name||"")+"</a> · "+esc(s.wilaya||"")+"</div></div></div>";
+  h+='<div class="sheet-actions" style="margin-top:12px">'+
+    (t.phone?'<a class="btn sm" href="tel:'+esc(t.phone)+'">📞 اتصال</a><a class="btn sm" href="'+esc(waLink(t.phone))+'" target="_blank" rel="noopener">💬 واتساب</a>':"")+
+    (t.email?'<a class="btn sm" href="mailto:'+esc(t.email)+'">✉️ بريد</a>':"")+
+    '<button class="btn sm pri" id="planV">+ موعد زيارة صفية</button><button class="btn sm" id="editT">✏️ تعديل</button></div></div>';
+  h+='<div class="card"><dl class="kv">'+
+    [["رقم الملف الوظيفي",t.fileNo],["المرحلة الدراسية",t.stage+(t.gFrom?" (الصفوف "+t.gFrom+" - "+t.gTo+")":"")],["عدد الحصص",t.periods],["صفة التعيين",t.appoint],
+     ["الدرجة الوظيفية",t.grade],["الهاتف",t.phone],["البريد",t.email],["الحالة",t.status],["ملاحظات",t.notes]]
+    .filter(function(x){return x[1]!==undefined&&x[1]!==null&&x[1]!=="";}).map(function(x){return "<dt>"+x[0]+"</dt><dd>"+esc(x[1])+"</dd>";}).join("")+"</dl></div>";
+  h+='<div class="stats" style="margin-top:6px"><div class="stat"><b>'+cls.length+'</b><span>زيارة صفية منفذة</span></div><div class="stat"><b>'+
+    ev.filter(function(e){return e.status==="planned"&&e.date>=todayISO();}).length+'</b><span>مواعيد قادمة</span></div></div>';
+  var tk=S.tasks.filter(function(k){return k.teacherId===id&&!k.done;});
+  if(tk.length)h+='<h2>🔁 متابعات مفتوحة <span class="count">'+tk.length+"</span></h2>"+tk.map(taskCard).join("");
+  var xs=S.exchanges.filter(function(x){return x.visitorId===id||x.hostId===id;});
+  if(xs.length)h+='<h2>🔄 الزيارات التبادلية <span class="count">'+xs.length+"</span></h2>"+xs.map(function(x){return '<div class="list-item" data-ex="'+esc(x.id)+'"><div class="avatar">🔄</div><div class="body"><div class="ttl">'+(x.visitorId===id?"زار: "+esc(tName(x.hostId)):"زاره: "+esc(tName(x.visitorId)))+'</div><div class="meta">'+(x.date?fmtDate(x.date):"")+"</div></div>‹</div>";}).join("");
+  h+='<h2>📜 السجل <span class="count">'+ev.length+"</span></h2>";
+  h+=ev.length?ev.map(function(e){return evCard(e,{actions:quickActions});}).join(""):'<div class="empty">لا يوجد سجل بعد</div>';
+  h+='<p class="small" style="margin-top:14px">تفاصيل الزيارة الصفية (المجالات والتوصيات) بتظهر هنا بعد ربط أرشيف «جودة وأثر» في خطوة قادمة.</p>';
+  $("view").innerHTML=h;bindEvCards($("view"));bindTasks($("view"));
+  $("view").querySelectorAll("[data-ex]").forEach(function(b){b.onclick=function(){location.hash="#exchange/"+b.dataset.ex;};});
+  $("planV").onclick=function(){openEvent(null,{type:"class",schoolId:t.schoolId,teacherIds:[t.id]});};
+  $("editT").onclick=function(){openTeacher(id);};
+}
+function viewSchools(){
+  var w=tFilter.w;
+  var list=S.schools.filter(function(s){return !w||s.wilaya===w;}).sort(function(a,b){return a.name.localeCompare(b.name,"ar");});
+  var h='<a class="back" href="#work">› العمل</a><div class="chips">'+[""].concat(wilayas()).map(function(x){return '<button class="chip'+(w===x?" on":"")+'" data-w="'+esc(x)+'">'+(x||"كل الولايات")+"</button>";}).join("")+"</div>";
+  h+='<div class="row" style="justify-content:space-between;margin-bottom:8px"><span class="small">'+list.length+' مدرسة</span><button class="btn sm" id="addS">+ مدرسة جديدة</button></div>';
+  h+=list.map(function(s){
+    var tc=S.teachers.filter(function(t){return t.schoolId===s.id;}).length;
+    var sv=S.events.filter(function(e){return e.type==="school"&&e.schoolId===s.id;});
+    var done=sv.filter(function(e){return e.status==="done";}).length;
+    var next=sv.filter(function(e){return e.status==="planned"&&e.date>=todayISO();}).sort(sortEv)[0];
+    return '<div class="list-item" data-s="'+esc(s.id)+'"><div class="avatar">🏫</div><div class="body"><div class="ttl">'+esc(s.name)+'</div><div class="meta">'+esc(s.wilaya||"")+" · "+tc+" معلم · "+done+" زيارة مدرسية منفذة</div>"+
+      (next?'<div class="meta">الزيارة القادمة: '+fmtShort(next.date)+"</div>":"")+"</div>‹</div>";}).join("");
+  $("view").innerHTML=h;
+  $("view").querySelectorAll("[data-w]").forEach(function(b){b.onclick=function(){tFilter.w=b.dataset.w;render();};});
+  $("view").querySelectorAll("[data-s]").forEach(function(b){b.onclick=function(){location.hash="#school/"+b.dataset.s;};});
+  $("addS").onclick=function(){openSchool(null);};
+}
+function viewSchool(id){
+  var s=school(id);if(!s){$("view").innerHTML='<div class="empty">المدرسة غير موجودة</div>';return;}
+  var ts=S.teachers.filter(function(t){return t.schoolId===id;});
+  var ev=S.events.filter(function(e){return e.schoolId===id;}).sort(sortEv).reverse();
+  var h='<a class="back" href="#schools">› المدارس</a><div class="card"><div style="font-size:19px;font-weight:700">🏫 '+esc(s.name)+'</div><div class="small">'+esc(s.wilaya||"")+'</div>'+
+    '<div class="sheet-actions" style="margin-top:10px"><button class="btn sm pri" id="planS">+ موعد زيارة مدرسية</button><button class="btn sm" id="editS">✏️ تعديل</button></div></div>';
+  h+='<h2>👨‍🏫 المعلمون <span class="count">'+ts.length+"</span></h2>";
+  h+=ts.map(function(t){var lv=lastVisit(t.id);return '<div class="list-item" data-t="'+esc(t.id)+'"><div class="avatar">'+esc(t.name.charAt(0))+'</div><div class="body"><div class="ttl">'+esc(t.name)+'</div><div class="meta">'+(lv?"آخر زيارة صفية: "+fmtShort(lv.date):"لم يُزر بعد")+"</div></div>‹</div>";}).join("")||'<div class="empty">لا يوجد معلمون</div>';
+  h+='<h2>📜 الزيارات والمواعيد <span class="count">'+ev.length+"</span></h2>";
+  h+=ev.map(function(e){return evCard(e,{actions:quickActions});}).join("")||'<div class="empty">لا يوجد سجل</div>';
+  $("view").innerHTML=h;bindEvCards($("view"));
+  $("view").querySelectorAll("[data-t]").forEach(function(b){b.onclick=function(){location.hash="#teacher/"+encodeURIComponent(b.dataset.t);};});
+  $("planS").onclick=function(){openEvent(null,{type:"school",schoolId:id});};
+  $("editS").onclick=function(){openSchool(id);};
+}
+function viewSchoolCal(){
+  var t=todayISO(),inCal=S.settings.scInCal||{};
+  var h='<a class="back" href="#work">› العمل</a>';
+  h+='<div class="card"><h3 style="margin-top:0">📚 التقويم الدراسي 2026/2027م</h3><p class="small" style="margin-top:0">ملخص التقويم السنوي للمدارس الحكومية — وزارة التعليم (نفس التقويم الموجود في «جودة وأثر»).</p>'+
+    '<label style="display:flex;gap:8px;align-items:center;margin:8px 0"><input type="checkbox" id="showSC"'+(S.settings.showSchoolCal?" checked":"")+'> إظهار الإجازات والمناسبات في «اليوم» و«المواعيد»</label>'+
+    '<div class="sheet-actions"><button class="btn pri" id="scHol">🔔 أضف الإجازات الرسمية لتقويم الموبايل</button><button class="btn" id="scAll">أضف كل التقويم الدراسي</button></div>'+
+    '<p class="small">الإجازات تنضاف مع تنبيه «'+(S.settings.defRem.holiday||[]).map(remLabel).join("، ")+'» (تغيّره من الإعدادات ← التنبيهات الافتراضية). مواعيد الأعياد والمناسبات الدينية تقريبية وقد تتغير حسب رؤية الهلال والإعلان الرسمي.</p></div>';
+  h+='<h2>🏖️ الإجازات الرسمية</h2><table class="tbl"><tr><th>الإجازة</th><th>التاريخ</th><th></th></tr>'+
+    SCHOOL_CAL.filter(function(x){return x.type==="holiday";}).map(function(x){var past=x.to<t;
+      return '<tr style="'+(past?"opacity:.45":"")+'"><td>'+esc(x.title)+'</td><td>'+fmtRange(x.date,x.to)+(x.to!==x.date?" ("+(daysBetween(x.date,x.to)+1)+" أيام)":"")+'</td><td>'+(past?"انتهت":inCal[x.id]?"🔔":'<button class="btn sm" data-sci="'+x.id+'">🔔</button>')+"</td></tr>";}).join("")+"</table>";
+  h+='<h2>📚 مناسبات العام الدراسي</h2><table class="tbl"><tr><th>المناسبة</th><th>التاريخ</th></tr>'+
+    SCHOOL_CAL.filter(function(x){return x.type==="schoolev";}).map(function(x){return '<tr style="'+(x.to<t?"opacity:.45":"")+'"><td>'+esc(x.title)+"</td><td>"+fmtRange(x.date,x.to)+"</td></tr>";}).join("")+"</table>";
+  h+='<h2>🎵 الخطة الزمنية لتقويم المهارات الموسيقية</h2><table class="tbl"><tr><th>الشهر</th><th>الصفوف والأداة</th></tr>'+
+    Object.keys(MUSIC_ASSESS).map(function(k){var d=parseISO(k+"-01");return "<tr><td>"+AR_MONTHS[d.getMonth()]+" "+d.getFullYear()+"</td><td>"+MUSIC_ASSESS[k].map(function(x){return "<div><b>"+x[0]+":</b> "+esc(x[1])+"</div>";}).join("")+"</td></tr>";}).join("")+"</table>";
+  $("view").innerHTML=h;
+  $("showSC").onchange=function(){S.settings.showSchoolCal=this.checked;save();toast(this.checked?"تم الإظهار":"تم الإخفاء");};
+  $("scHol").onclick=function(){addSchoolCalToCalendar(SCHOOL_CAL.filter(function(x){return x.type==="holiday"&&x.to>=t&&!inCal[x.id];}).map(function(x){return x.id;}));render();};
+  $("scAll").onclick=function(){addSchoolCalToCalendar(SCHOOL_CAL.filter(function(x){return x.to>=t&&!inCal[x.id];}).map(function(x){return x.id;}));render();};
+  $("view").querySelectorAll("[data-sci]").forEach(function(b){b.onclick=function(){addSchoolCalToCalendar([b.dataset.sci]);render();};});
+}
+function checkUpdate(){
+  if(!navigator.onLine){toast("لازم إنترنت للتحقق من التحديث");return;}
+  toast("جاري تنزيل آخر نسخة…");
+  var jobs=[];
+  try{if(window.caches)jobs.push(caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k.indexOf("msa-v")===0;}).map(function(k){return caches.delete(k);}));}));}catch(e){}
+  try{if(navigator.serviceWorker)jobs.push(navigator.serviceWorker.getRegistration().then(function(r){return r&&r.update();}));}catch(e){}
+  Promise.all(jobs).catch(function(){}).then(function(){setTimeout(function(){location.reload();},600);});
+}
+function viewMore(){
+  function item(go,ic,t,m){return '<div class="list-item" data-go="'+go+'"><div class="avatar">'+ic+'</div><div class="body"><div class="ttl">'+t+'</div><div class="meta">'+m+"</div></div>‹</div>";}
+  var h='<h2 style="margin-top:4px">☰ المزيد</h2>'+
+    item("sync","☁️","المزامنة بين الأجهزة",SY.user?"✅ متصل: "+esc(SY.user.email||""):"سجّل الدخول، وتعديلات الكمبيوتر تظهر في التليفون لحالها")+
+    item("settings","🔔","التنبيهات والإعدادات","أوقات التنبيه لكل نوع، صوت المنبه، اسمك")+
+    item("backup","💾","النسخ الاحتياطي ونقل البيانات","نقل بياناتك بين الموبايل والكمبيوتر")+
+    item("install","📲","التثبيت على الموبايل","أيقونة على الشاشة، ويشتغل بدون إنترنت");
+  h+='<div style="text-align:center;margin-top:18px"><button class="btn" id="chkUpd">🔄 تحقق من التحديث</button><p class="small">المساعد الشخصي · الإصدار '+APP_VERSION+"</p></div>";
+  $("view").innerHTML=h;
+  $("view").querySelectorAll("[data-go]").forEach(function(b){b.onclick=function(){location.hash="#"+b.dataset.go;};});
+  $("chkUpd").onclick=checkUpdate;
+}
+function viewBackup(){
+  var lb=S.settings.lastBackup;
+  var h='<a class="back" href="#more">› المزيد</a>';
+  h+='<div class="card"><h3 style="margin-top:0">💾 أخذ نسخة احتياطية</h3><p class="small">ينشئ ملفًا صغيرًا فيه كل بياناتك. احفظه في «الملفات» أو أرسله لنفسك بالواتساب أو البريد.</p>'+
+    '<p>آخر نسخة: <b>'+(lb?fmtDate(lb.slice(0,10))+" "+new Date(lb).toLocaleTimeString("ar",{hour:"numeric",minute:"2-digit",numberingSystem:"latn"}):"لم تُؤخذ بعد")+"</b></p>"+
+    '<button class="btn pri" id="doExport">⬇️ أخذ نسخة احتياطية الآن</button></div>';
+  h+='<div class="card"><h3 style="margin-top:0">📥 استيراد نسخة احتياطية</h3><p class="small">لنقل بياناتك من جهاز آخر: افتح ملف النسخة هنا. <b>بيانات هذا الجهاز تُستبدل</b> بالبيانات اللي في الملف، ويُحفظ نسخة من الحالية تقدر ترجع لها.</p>'+
+    '<button class="btn" id="doImport">📂 اختيار ملف النسخة</button>'+(localStorage.getItem(PREV)?' <button class="btn" id="doUndo">↩️ الرجوع للبيانات قبل آخر استيراد</button>':"")+"</div>";
+  h+='<div class="card"><h3 style="margin-top:0">طريقة نقل البيانات بين الموبايل والكمبيوتر</h3><ol style="margin:0;padding-right:20px">'+
+    "<li>على الجهاز اللي اشتغلت عليه: «أخذ نسخة احتياطية الآن».</li><li>أرسل الملف لنفسك (واتساب أو بريد)، أو احفظه في iCloud.</li>"+
+    "<li>على الجهاز الثاني: «اختيار ملف النسخة» واختر الملف.</li></ol><p class='small'>نصيحة: اشتغل على جهاز واحد في اليوم، وانقل النسخة في نهاية اليوم، حتى ما تكتب في الجهازين بنفس الوقت.</p></div>";
+  $("view").innerHTML=h;
+  $("doExport").onclick=exportBackup;
+  $("doImport").onclick=function(){$("importFile").click();};
+  var u=$("doUndo");if(u)u.onclick=function(){if(!confirm("ترجع للبيانات اللي كانت قبل آخر استيراد؟"))return;try{var p=localStorage.getItem(PREV);S=migrate(JSON.parse(p));save();toast("تم الرجوع");render();}catch(e){toast("تعذّر الرجوع");}};
+}
+function stamp(){var d=new Date();return iso(d)+"_"+pad(d.getHours())+pad(d.getMinutes());}
+function exportBackup(){
+  S.settings.lastBackup=new Date().toISOString();save();
+  var txt=JSON.stringify({app:"msa",version:APP_VERSION,exportedAt:S.settings.lastBackup,data:S});
+  var name="المساعد_الشخصي_نسخة_"+stamp()+".json";
+  try{
+    var file=new File([txt],name,{type:"application/json"});
+    if(isIOS()&&navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:"نسخة احتياطية"}).then(function(){toast("تم ✓");render();}).catch(function(){render();});return;
+    }
+  }catch(e){}
+  deliverFile(txt,name,"application/json");toast("تم إنشاء النسخة ✓");render();
+}
+$("importFile").addEventListener("change",function(){
+  var f=this.files[0];this.value="";if(!f)return;
+  var r=new FileReader();r.onload=function(){
+    try{
+      var j=JSON.parse(r.result),d=j&&j.app==="msa"?j.data:null;
+      if(!d||!Array.isArray(d.events)||!Array.isArray(d.teachers))throw 0;
+      var when=j.exportedAt?fmtDate(j.exportedAt.slice(0,10)):"";
+      var empty=!S.teachers.length&&!S.events.length;
+      if(!confirm("استيراد بيانات بتاريخ "+when+"؟\nفيها "+d.teachers.length+" معلم و"+d.events.length+" موعد."+(empty?"":"\nبيانات هذا الجهاز ستُستبدل.")))return;
+      try{localStorage.setItem(PREV,JSON.stringify(S));}catch(e){}
+      S=migrate(d);S.settings.lastBackup=j.exportedAt||S.settings.lastBackup;save();toast("تم الاستيراد ✓");location.hash="#today";render();
+    }catch(e){toast("هذا الملف ليس نسخة احتياطية من مساعد المشرف");}
+  };r.readAsText(f);
+});
+function viewInstall(){
+  var h='<a class="back" href="#more">› المزيد</a>';
+  h+='<div class="card"><h3 style="margin-top:0">📱 على الآيفون</h3><ol style="margin:0;padding-right:20px"><li>افتح رابط البرنامج في <b>سفاري</b> (وأنت متصل بالإنترنت).</li><li>اضغط زر المشاركة <b>⬆️</b>، واسحب القائمة لفوق.</li><li>اختر <b>«إضافة إلى الشاشة الرئيسية»</b> ثم «إضافة».</li><li>افتح البرنامج من الأيقونة الجديدة. بعدها يشتغل بدون إنترنت.</li></ol></div>';
+  h+='<div class="card"><h3 style="margin-top:0">🤖 على أندرويد</h3><ol style="margin:0;padding-right:20px"><li>افتح الرابط في <b>Chrome</b>.</li><li>اضغط النقاط الثلاث <b>⋮</b>.</li><li>اختر <b>«تثبيت التطبيق»</b> أو «إضافة إلى الشاشة الرئيسية».</li></ol></div>';
+  h+='<div class="card"><h3 style="margin-top:0">💻 على الكمبيوتر</h3><p style="margin:0">افتح الرابط في Chrome أو Edge، واضغط أيقونة التثبيت في شريط العنوان.</p></div>';
+  $("view").innerHTML=h;
+}
+function viewSettings(){
+  var h='<a class="back" href="#more">› المزيد</a>';
+  h+='<div class="card"><h3 style="margin-top:0">🔊 صوت المنبه</h3><p style="margin-top:0">المنبه يرن من <b>تقويم الموبايل</b>، فيشتغل حتى والبرنامج مقفول وبدون إنترنت. لاختيار الصوت:</p>'+
+    '<ol style="margin:0;padding-right:20px"><li><b>الآيفون:</b> الإعدادات ← الأصوات واللمس (الأصوات والحس اللمسي) ← <b>تنبيهات التقويم</b>، واختر النغمة.</li>'+
+    '<li>تأكد إن إشعارات التقويم مفعّلة: الإعدادات ← الإشعارات ← التقويم ← السماح بالإشعارات + الأصوات.</li>'+
+    '<li><b>أندرويد:</b> افتح تطبيق التقويم ← الإعدادات ← الإشعارات ← الصوت.</li></ol></div>';
+  h+='<div class="card"><h3 style="margin-top:0">⏰ التنبيهات الافتراضية لكل نوع</h3><p class="small" style="margin-top:0">لما تضيف موعدًا جديدًا، تنحط هذه التنبيهات تلقائيًا، وتقدر تغيّرها في كل موعد.</p>'+
+    '<div class="field"><label>النوع</label><select id="drType">'+Object.keys(TYPES).map(function(k){return '<option value="'+k+'">'+(TYPES[k].g==="work"?"💼 ":"🏡 ")+TYPES[k].name+"</option>";}).join("")+'<option value="holiday">🏖️ الإجازات الرسمية</option></select></div>'+
+    '<div id="drEd"></div><div class="sheet-actions"><button class="btn pri" id="drSave">حفظ للمواعيد الجديدة</button><button class="btn" id="drApply">تطبيق على المواعيد القادمة من هذا النوع</button></div>'+
+    '<p class="small">بعد «تطبيق على المواعيد القادمة»: المواعيد اللي أضفتها لتقويم الموبايل من قبل يرجع لها زر «🔔 أضف للتقويم». احذف القديم من تقويم الموبايل وأضفها من جديد.</p></div>';
+  h+='<div class="card"><div class="field"><label>اسم المشرف (يظهر في التقارير والشهادات)</label><input id="supName" value="'+esc(S.settings.supervisor||"")+'"></div>'+
+    '<button class="btn pri" id="saveSet">حفظ</button></div>';
+  h+='<div class="card"><h3 style="margin-top:0">مسح كل البيانات</h3><p class="small">يمسح كل البيانات من هذا الجهاز. خذ نسخة احتياطية قبلها.</p><button class="btn danger" id="reset">إعادة الضبط</button></div>';
+  $("view").innerHTML=h;
+  var cur={type:"school",rems:clone(S.settings.defRem.school||[])};
+  function draw(){remEditor($("drEd"),cur.rems,null);}
+  draw();
+  $("drType").onchange=function(){cur.type=this.value;cur.rems=clone(S.settings.defRem[cur.type]||[]);draw();};
+  $("drSave").onclick=function(){S.settings.defRem[cur.type]=clone(cur.rems);save();toast("تم الحفظ ✓");};
+  $("drApply").onclick=function(){
+    var t=todayISO(),list=S.events.filter(function(e){return e.type===cur.type&&(e.repeat||(e.status==="planned"&&e.date>=t));});
+    if(!list.length){toast("لا توجد مواعيد قادمة من هذا النوع");return;}
+    if(!confirm("تطبيق هذه التنبيهات على "+list.length+" موعد قادم من نوع «"+(TYPES[cur.type]||{name:""}).name+"»؟"))return;
+    S.settings.defRem[cur.type]=clone(cur.rems);
+    list.forEach(function(e){e.reminders=clone(cur.rems);e.inCalendar=false;});save();
+    toast("تم التطبيق على "+list.length+" موعد ✓");
+  };
+  $("saveSet").onclick=function(){S.settings.supervisor=$("supName").value.trim();save();toast("تم الحفظ ✓");};
+  $("reset").onclick=function(){if(!confirm("متأكد؟ ستُحذف كل البيانات على هذا الجهاز."))return;try{localStorage.setItem(PREV,JSON.stringify(S));localStorage.removeItem(KEY);}catch(e){}load();toast("تمت إعادة الضبط");location.hash="#today";};
+}
+
+/* ============ محرر التنبيهات ============ */
+function remEditor(box,rems,getEv){
+  /* كل تنبيه = سطر واحد: «متى» + «الساعة». الساعة تظهر لخيارات الأيام، وأنت تكتبها بنفسك */
+  var OPTS=[["m15","قبل الموعد بربع ساعة"],["m30","قبل الموعد بنصف ساعة"],["h1","قبل الموعد بساعة"],["h2","قبل الموعد بساعتين"],["h3","قبل الموعد بـ3 ساعات"],
+    ["d0","في يوم الموعد، الساعة"],["d1","قبله بيوم، الساعة"],["d2","قبله بيومين، الساعة"],["d3","قبله بـ3 أيام، الساعة"],["d7","قبله بأسبوع، الساعة"],["d14","قبله بأسبوعين، الساعة"]];
+  function keyOf(r){return (r.u||"d")+(+r.n||0);}
+  function normalize(r,e){ // تحويل «وقت محدد» القديم إلى يوم + ساعة
+    if(r.k!=="abs")return r;
+    var a=alarmTime(e||{date:todayISO()},r);if(!a||!e||!e.date)return {n:0,u:"d",at:"07:00"};
+    var diff=Math.max(0,daysBetween(iso(a),e.date));return {n:diff,u:"d",at:pad(a.getHours())+":"+pad(a.getMinutes())};
+  }
+  function draw(){
+    var e=getEv?getEv():null,timed=!e||!!e.start;
+    for(var i=0;i<rems.length;i++)rems[i]=normalize(rems[i],e);
+    var h=rems.map(function(r,i){
+      var k=keyOf(r),opts=OPTS.filter(function(o){return timed||o[0].charAt(0)==="d"||o[0]===k;});
+      if(!opts.some(function(o){return o[0]===k;}))opts.push([k,(r.u==="d"?"قبله بـ"+r.n+" يوم، الساعة":"قبل الموعد بـ"+r.n+" "+UNITS[r.u])]);
+      var sel='<select data-i="'+i+'" data-f="when">'+opts.map(function(o){return '<option value="'+o[0]+'"'+(o[0]===k?" selected":"")+">"+o[1]+"</option>";}).join("")+"</select>";
+      var at="";
+      if(r.u==="d"){var def=e?alarmTime(e,r):null;var v=r.at||(def?pad(def.getHours())+":"+pad(def.getMinutes()):"19:00");at='<input type="time" data-i="'+i+'" data-f="at" value="'+esc(v)+'">';}
+      var prev="";
+      if(e&&e.date){var a=alarmTime(e,r);if(a){
+        var evEnd=e.start?evStart(e):(function(){var x=parseISO(e.date);x.setHours(23,59,0,0);return x;})();
+        prev=a>evEnd?'<div class="warnline" style="width:100%">⚠️ هذا التنبيه بعد الموعد! غيّر اليوم أو الساعة.</div>':
+          '<div class="rem-preview" style="width:100%">🔔 يرن: '+fmtAlarm(a)+(e.repeat?" (ويتكرر مع الموعد)":"")+"</div>";}}
+      return '<div class="rem-row">'+sel+at+'<button type="button" class="x" data-del="'+i+'" aria-label="حذف التنبيه">✕</button>'+prev+"</div>";
+    }).join("")||'<p class="small" style="margin:4px 0">بدون تنبيه</p>';
+    h+='<div class="row"><button type="button" class="btn sm" data-add="1">+ إضافة تنبيه</button></div>';
+    box.innerHTML=h;
+    box.querySelectorAll("[data-f]").forEach(function(el){
+      el.onchange=function(){
+        var i=+el.dataset.i,r=rems[i],e=getEv?getEv():null;
+        if(el.dataset.f==="when"){
+          var u=el.value.charAt(0),n=+el.value.slice(1);
+          if(u==="d"){ // نحافظ على الساعة اللي كانت ظاهرة
+            var keep=r.u==="d"&&r.at?r.at:null;
+            if(!keep&&e&&e.date){var a=alarmTime(e,r);if(a)keep=pad(a.getHours())+":"+pad(a.getMinutes());}
+            rems[i]={n:n,u:"d",at:keep||(n===0?"07:00":"20:00")};
+          }else rems[i]={n:n,u:u};
+        }else if(el.dataset.f==="at"){r.at=el.value;}
+        draw();
+      };
+    });
+    box.querySelectorAll("[data-del]").forEach(function(b){b.onclick=function(){rems.splice(+b.dataset.del,1);draw();};});
+    box.querySelector("[data-add]").onclick=function(){var e=getEv?getEv():null;rems.push(e&&!e.start?{n:0,u:"d",at:"07:00"}:{n:1,u:"h"});draw();};
+  }
+  draw();box._redraw=draw;
+}
+
+/* ============ نافذة الموعد ============ */
+function modal(html,onMount){
+  var bg=document.createElement("div");bg.className="modal-bg";bg.innerHTML='<div class="modal">'+html+"</div>";
+  document.body.appendChild(bg);document.body.style.overflow="hidden";
+  function close(){bg.remove();document.body.style.overflow="";}
+  bg.addEventListener("click",function(e){if(e.target===bg)close();});
+  onMount(bg,close);return close;
+}
+function openEvent(id,preset){
+  preset=preset||{};
+  var e=id?evById(id):null,isNew=!e;
+  var defType=preset.type||(S.settings.scope==="life"?"personal":S.settings.scope==="work"?"school":"personal");
+  var d=e?clone(e):{id:uid("e"),type:defType,title:"",date:preset.date||todayISO(),start:"",end:"",schoolId:preset.schoolId||"",
+    teacherIds:preset.teacherIds||[],place:"",notes:"",status:"planned",repeat:"",until:"",reminders:clone(S.settings.defRem[defType]||[])};
+  if(isNew){if(preset.title)d.title=preset.title;if(preset.start)d.start=preset.start;}
+  if(preset.resched){d.status="planned";d.date=addDays(todayISO(),1);d.inCalendar=false;}
+  var remTouched=!isNew;
+  function typeButtons(g){return Object.keys(TYPES).filter(function(k){return TYPES[k].g===g;}).map(function(k){return '<button type="button" data-ty="'+k+'" style="--tc:'+TYPES[k].c+'"'+(d.type===k?' class="on"':"")+">"+TYPES[k].name+"</button>";}).join("");}
+  var schoolOpts='<option value="">— بدون مدرسة —</option>'+S.schools.slice().sort(function(a,b){return a.name.localeCompare(b.name,"ar");}).map(function(s){return '<option value="'+esc(s.id)+'"'+(s.id===d.schoolId?" selected":"")+">"+esc(s.name)+" ("+esc(s.wilaya||"")+")</option>";}).join("");
+  var h="<h3>"+(isNew?"موعد جديد":preset.resched?"تحديد موعد جديد":"تفاصيل الموعد")+"</h3>"+
+    '<div class="field"><label>العنوان</label><input id="fTitle" value="'+esc(d.title&&d.title!==(TYPES[d.type]||{}).name?d.title:"")+'" placeholder="مثلًا: موعد طبيب الأسنان"></div>'+
+    '<div class="field"><label>النوع</label><div class="grp-label">🏡 حياتي</div><div class="typegrid">'+typeButtons("life")+'</div><div class="grp-label">💼 العمل</div><div class="typegrid">'+typeButtons("work")+"</div></div>"+
+    '<div class="grid2"><div class="field"><label>التاريخ</label><input type="date" id="fDate" value="'+esc(d.date||"")+'"></div><div class="field"><label>الساعة (اتركها فاضية = طوال اليوم)</label><input type="time" id="fStart" value="'+esc(d.start||"")+'"></div></div>'+
+    '<div id="fHol"></div>'+
+    '<div class="field"><label>🔔 التنبيهات: اختر اليوم واكتب الساعة اللي تبيه يرن فيها</label><div id="fRem"></div></div>'+
+    '<div id="fEdu"><div class="field"><label>المدرسة</label><select id="fSchool">'+schoolOpts+'</select></div><div class="field"><label>المعلمون</label><div class="multi" id="fTeachers"></div></div></div>'+
+    '<details class="more"'+(d.place||d.notes||d.end||d.repeat||!isNew?" open":"")+'><summary>تفاصيل إضافية: التكرار، المكان، الملاحظات</summary>'+
+    '<div class="grid2"><div class="field"><label>🔁 التكرار</label><select id="fRepeat">'+Object.keys(REPEAT).map(function(k){return '<option value="'+k+'"'+(d.repeat===k?" selected":"")+">"+REPEAT[k]+"</option>";}).join("")+'</select></div><div class="field" id="fUntilW"><label>يتكرر حتى (اختياري)</label><input type="date" id="fUntil" value="'+esc(d.until||"")+'"></div></div>'+
+      '<div class="field"><label>إلى الساعة</label><input type="time" id="fEnd" value="'+esc(d.end||"")+'"></div>'+
+      '<div class="field"><label>المكان</label><input id="fPlace" value="'+esc(d.place||"")+'"></div>'+
+      (isNew&&!preset.resched?"":'<div class="field"><label>الحالة</label><select id="fStatus">'+Object.keys(STATUS).map(function(k){return '<option value="'+k+'"'+(k===d.status?" selected":"")+">"+STATUS[k]+"</option>";}).join("")+"</select></div>")+
+      '<div class="field"><label>ملاحظات</label><textarea id="fNotes">'+esc(d.notes||"")+"</textarea></div>"+
+    "</details>"+
+    '<div class="row" style="margin-top:10px"><button class="btn pri" id="fSaveCal">💾 حفظ + 🔔 للتقويم</button><button class="btn" id="fSave">حفظ فقط</button>'+
+    (!isNew?'<button class="btn danger" id="fDel">حذف</button>':"")+'<button class="btn" id="fCancel">إلغاء</button></div>'+
+    '<p class="small" style="margin-top:10px">«حفظ + للتقويم» يضيف الموعد وتنبيهاته لتقويم الموبايل، فيرن في وقته حتى والبرنامج مقفول.'+(!isNew&&d.inCalendar?" <b>لو عدّلت موعدًا مضافًا من قبل، احذف القديم من تقويم الموبايل.</b>":"")+"</p>"+
+    (!isNew&&d.date?'<p class="small">ما ظهرت نافذة التقويم؟ <a href="#" id="gcal" target="_blank" rel="noopener">أضفه عن طريق Google Calendar</a> (يحتاج إنترنت).</p>':"")+
+    (d.source?'<p class="small">مصدر الموعد: '+esc(d.source)+"</p>":"")+
+    (!isNew&&d.type==="exchange"?'<p><a class="btn" href="#exchange/'+esc(d.exId||"new-"+d.id)+'" id="fEx">📝 '+(d.exId?"فتح":"تعبئة")+" استمارة الزيارة التبادلية</a></p>":"");
+  modal(h,function(bg,close){
+    var fx=bg.querySelector("#fEx");if(fx)fx.addEventListener("click",function(){close();});
+    var q=function(s){return bg.querySelector(s);};
+    function readBasics(){d.date=q("#fDate").value;d.start=q("#fStart").value;d.repeat=q("#fRepeat").value;d.until=q("#fUntil").value;}
+    function refresh(){
+      readBasics();
+      q("#fEdu").style.display=TYPES[d.type].edu?"":"none";
+      q("#fUntilW").style.visibility=d.repeat?"visible":"hidden";
+      var hl=d.date&&holidayOn(d.date);q("#fHol").innerHTML=hl?'<div class="warnline">🏖️ هذا اليوم إجازة رسمية: '+esc(hl.title)+"</div>":"";
+      if(q("#fRem")._redraw)q("#fRem")._redraw();
+    }
+    remEditor(q("#fRem"),d.reminders,function(){return d;});
+    q("#fRem").addEventListener("click",function(){remTouched=true;},true);
+    q("#fRem").addEventListener("change",function(){remTouched=true;},true);
+    bg.querySelectorAll("[data-ty]").forEach(function(b){b.onclick=function(){
+      d.type=b.dataset.ty;bg.querySelectorAll("[data-ty]").forEach(function(x){x.classList.toggle("on",x===b);});
+      if(!remTouched){d.reminders.length=0;(S.settings.defRem[d.type]||[]).forEach(function(r){d.reminders.push(clone(r));});}
+      refresh();};});
+    ["#fDate","#fStart","#fRepeat","#fUntil"].forEach(function(s){q(s).addEventListener("change",refresh);});
+    function fillTeachers(){
+      var sid=q("#fSchool").value;
+      var list=S.teachers.slice().sort(function(a,b){return (a.schoolId===sid?0:1)-(b.schoolId===sid?0:1)||a.name.localeCompare(b.name,"ar");});
+      var show=sid?list.filter(function(t){return t.schoolId===sid||d.teacherIds.indexOf(t.id)>-1;}):list;
+      q("#fTeachers").innerHTML=show.map(function(t){return '<label><input type="checkbox" value="'+esc(t.id)+'"'+(d.teacherIds.indexOf(t.id)>-1?" checked":"")+">"+esc(t.name)+(sid?"":' <span class="small">('+esc(schoolName(t.schoolId))+")</span>")+"</label>";}).join("")||'<span class="small">لا يوجد معلمون في هذه المدرسة</span>';
+      bg.querySelectorAll("#fTeachers input").forEach(function(c){c.onchange=function(){var i=d.teacherIds.indexOf(c.value);if(c.checked&&i<0)d.teacherIds.push(c.value);if(!c.checked&&i>-1)d.teacherIds.splice(i,1);};});
+    }
+    fillTeachers();q("#fSchool").onchange=fillTeachers;refresh();
+    function collect(){
+      readBasics();
+      d.title=q("#fTitle").value.trim()||TYPES[d.type].name;
+      d.end=q("#fEnd").value;d.place=q("#fPlace").value.trim();d.notes=q("#fNotes").value.trim();
+      if(q("#fStatus")){if(d.status!==q("#fStatus").value)d.autoDone=false;d.status=q("#fStatus").value;}
+      if(TYPES[d.type].edu)d.schoolId=q("#fSchool").value;else{d.schoolId="";d.teacherIds=[];}
+      if(!d.date){toast("اختر التاريخ");return false;}
+      if(!TYPES[d.type].edu&&!q("#fTitle").value.trim()&&d.type!=="meeting"&&d.type!=="course"){toast("اكتب عنوان الموعد");q("#fTitle").focus();return false;}
+      if(d.end&&d.start&&d.end<d.start){toast("وقت النهاية قبل البداية");return false;}
+      if(d.repeat&&d.until&&d.until<d.date){toast("تاريخ نهاية التكرار قبل الموعد");return false;}
+      if(!d.repeat)d.until="";
+      if(e&&(e.date!==d.date||e.start!==d.start||JSON.stringify(e.reminders)!==JSON.stringify(d.reminders)||e.repeat!==d.repeat))d.inCalendar=false;
+      var hl=holidayOn(d.date);
+      if(hl&&isWork(d.type)&&d.status==="planned"&&(!e||e.date!==d.date)&&!confirm("تنبيه: "+fmtDate(d.date)+" إجازة رسمية ("+hl.title+").\nتحفظ الموعد في هذا اليوم؟"))return false;
+      return true;
+    }
+    function commit(){
+      if(preset.resched&&e){e.status="postponed";d.id=uid("e");e.reschedTo=d.id;d.notes=(d.notes?d.notes+"\n":"")+"مؤجل من "+fmtDate(e.date);delete d.source;S.events.push(d);}
+      else if(isNew)S.events.push(d);
+      else Object.assign(e,d);
+      save();
+    }
+    q("#fSave").onclick=function(){if(!collect())return;commit();close();toast("تم الحفظ ✓");render();};
+    q("#fSaveCal").onclick=function(){if(!collect())return;commit();close();render();addToCalendar([d.id]);};
+    q("#fCancel").onclick=close;
+    var del=q("#fDel");if(del)del.onclick=function(){if(!confirm("حذف هذا الموعد"+(e.repeat?" وكل تكراراته":"")+"؟"))return;S.events=S.events.filter(function(x){return x.id!==e.id;});save();close();toast("تم الحذف");render();};
+    var g=q("#gcal");if(g)g.href=gcalLink(d);
+  });
+}
+function openTeacher(id){
+  var t=id?teacher(id):null,isNew=!t;
+  var d=t?clone(t):{id:"",name:"",schoolId:"",stage:"",periods:"",appoint:"",grade:"",fileNo:"",phone:"",email:"",status:"على رأس العمل",notes:""};
+  var F=[["name","الاسم"],["fileNo","رقم الملف الوظيفي"],["stage","المرحلة الدراسية"],["periods","عدد الحصص"],["appoint","صفة التعيين"],["grade","الدرجة الوظيفية"],["phone","الهاتف"],["email","البريد الإلكتروني"]];
+  function fld(f){return '<div class="field"><label>'+f[1]+'</label><input id="t_'+f[0]+'" value="'+esc(d[f[0]]==null?"":d[f[0]])+'"></div>';}
+  var h="<h3>"+(isNew?"معلم جديد":"تعديل بيانات المعلم")+"</h3>"+
+    F.slice(0,2).map(fld).join("")+
+    '<div class="field"><label>المدرسة</label><select id="tSchool">'+S.schools.slice().sort(function(a,b){return a.name.localeCompare(b.name,"ar");}).map(function(s){return '<option value="'+esc(s.id)+'"'+(s.id===d.schoolId?" selected":"")+">"+esc(s.name)+"</option>";}).join("")+"</select></div>"+
+    F.slice(2).map(fld).join("")+
+    '<div class="field"><label>الحالة</label><select id="t_status">'+["على رأس العمل","منقول","إجازة","متقاعد"].map(function(x){return "<option"+(x===d.status?" selected":"")+">"+x+"</option>";}).join("")+"</select></div>"+
+    '<div class="field"><label>ملاحظات</label><textarea id="t_notes">'+esc(d.notes||"")+"</textarea></div>"+
+    '<div class="row"><button class="btn pri" id="tSave">حفظ</button><button class="btn" id="tCancel">إلغاء</button></div>';
+  modal(h,function(bg,close){
+    bg.querySelector("#tCancel").onclick=close;
+    bg.querySelector("#tSave").onclick=function(){
+      F.forEach(function(f){d[f[0]]=bg.querySelector("#t_"+f[0]).value.trim();});
+      d.schoolId=bg.querySelector("#tSchool").value;d.status=bg.querySelector("#t_status").value;d.notes=bg.querySelector("#t_notes").value.trim();
+      if(!d.name){toast("اكتب اسم المعلم");return;}
+      if(isNew){d.id=d.fileNo||uid("t");if(teacher(d.id)){toast("رقم الملف موجود لمعلم آخر");return;}S.teachers.push(d);}
+      else{Object.assign(t,d);}
+      save();close();toast("تم الحفظ ✓");if(isNew)location.hash="#teacher/"+encodeURIComponent(d.id);else render();
+    };
+  });
+}
+function openSchool(id){
+  var s=id?school(id):null,isNew=!s;
+  var h="<h3>"+(isNew?"مدرسة جديدة":"تعديل المدرسة")+'</h3><div class="field"><label>اسم المدرسة</label><input id="sName" value="'+esc(s?s.name:"")+'"></div>'+
+    '<div class="field"><label>الولاية</label><input id="sW" list="wl" value="'+esc(s?s.wilaya:"")+'"><datalist id="wl">'+wilayas().map(function(w){return "<option>"+esc(w)+"</option>";}).join("")+"</datalist></div>"+
+    '<div class="row"><button class="btn pri" id="sSave">حفظ</button><button class="btn" id="sCancel">إلغاء</button></div>';
+  modal(h,function(bg,close){
+    bg.querySelector("#sCancel").onclick=close;
+    bg.querySelector("#sSave").onclick=function(){
+      var n=bg.querySelector("#sName").value.trim(),w=bg.querySelector("#sW").value.trim();if(!n){toast("اكتب اسم المدرسة");return;}
+      if(isNew)S.schools.push({id:uid("s"),name:n,wilaya:w});else{s.name=n;s.wilaya=w;}
+      save();close();toast("تم الحفظ ✓");render();
+    };
+  });
+}
+
+
+/* ============ أساليب الإشراف: الزيارة التبادلية ============ */
+var EX_GOALS = ["استراتيجية تدريس","الأداء العملي (عزف/غناء/إيقاع)","إدارة الصف الموسيقي","توظيف الآلات والتقنية","التقويم والتغذية الراجعة","النشيد والأداء الجماعي"];
+var EX_ITEMS = ["وضوح أهداف الدرس وارتباطها بالأنشطة","تنوع الاستراتيجيات ومناسبتها للمرحلة","التطبيق العملي للطلاب (عزف، غناء، إيقاع)","توظيف الآلات والوسائل والتقنية","إدارة الصف وتفاعل الطلاب","التقويم والتغذية الراجعة أثناء الحصة"];
+var EX_LEVELS = {full:"متحقق بوضوح",part:"متحقق جزئيًا",none:"لم يُلاحظ"};
+var METHODS = [
+  {k:"exchange",ic:"🔄",t:"الزيارة التبادلية",m:"معلم يزور حصة زميل لنقل ممارسة متميزة",ready:true},
+  {k:"class",ic:"👁️",t:"الزيارة الصفية",m:"داخل «جودة وأثر» — الربط بالأرشيف قريبًا"},
+  {k:"model",ic:"🎹",t:"الدرس التطبيقي",m:"قريبًا"},
+  {k:"bulletin",ic:"📰",t:"النشرة التربوية",m:"قريبًا"},
+  {k:"reading",ic:"📖",t:"القراءات الموجهة",m:"قريبًا"},
+  {k:"meetings",ic:"🤝",t:"الاجتماعات واللقاءات",m:"قريبًا"}
+];
+function ensureCollections(st){st.exchanges=st.exchanges||[];st.tasks=st.tasks||[];return st;}
+function tName(id){var t=teacher(id);return t?t.name:"";}
+function tSchool(id){var t=teacher(id);return t?schoolName(t.schoolId):"";}
+function teacherOptions(sel,placeholder){
+  return '<option value="">'+(placeholder||"— اختر —")+"</option>"+S.teachers.slice().sort(function(a,b){return schoolName(a.schoolId).localeCompare(schoolName(b.schoolId),"ar")||a.name.localeCompare(b.name,"ar");})
+    .map(function(t){return '<option value="'+esc(t.id)+'"'+(t.id===sel?" selected":"")+">"+esc(t.name)+" — "+esc(schoolName(t.schoolId))+"</option>";}).join("");
+}
+
+function viewMethods(){
+  var h='<a class="back" href="#work">› العمل</a><h2 style="margin-top:4px">🔄 أساليب الإشراف</h2>';
+  h+=METHODS.map(function(x){return '<div class="list-item'+(x.ready?"":" soon")+'"'+(x.ready?' data-go="'+x.k+'s"':"")+'><div class="avatar">'+x.ic+'</div><div class="body"><div class="ttl">'+x.t+(x.ready?"":' <span class="tag">قريبًا</span>')+'</div><div class="meta">'+x.m+"</div></div>"+(x.ready?"‹":"")+"</div>";}).join("");
+  $("view").innerHTML=h;
+  $("view").querySelectorAll("[data-go]").forEach(function(b){b.onclick=function(){location.hash="#"+b.dataset.go;};});
+}
+function viewExchanges(){
+  var list=S.exchanges.slice().sort(function(a,b){return (b.date||"").localeCompare(a.date||"");});
+  var planned=S.events.filter(function(e){return e.type==="exchange"&&e.status==="planned"&&!S.exchanges.some(function(x){return x.eventId===e.id;});}).sort(sortEv);
+  var h='<a class="back" href="#methods">› أساليب الإشراف</a>';
+  h+='<div class="row" style="justify-content:space-between;margin:4px 0 8px"><h2 style="margin:0">🔄 الزيارات التبادلية <span class="count">'+list.length+'</span></h2><button class="btn pri" id="newEx">+ استمارة جديدة</button></div>';
+  h+='<p class="small" style="margin-top:0">معلم يزور حصة زميل لنقل ممارسة متميزة. الاستمارة <b>وصفية وليست تقييمًا</b> للمعلم المزور، و«خطة التطبيق» تتحول لمتابعة تظهر لك.</p>';
+  if(planned.length){
+    h+="<h2>📅 مواعيد تبادلية بدون استمارة</h2>";
+    h+=planned.map(function(e){return evCard(e,{actions:function(x){return '<button class="btn sm pri" data-fromev="'+esc(x.id)+'">📝 تعبئة الاستمارة</button>';}});}).join("");
+  }
+  h+="<h2>📋 الاستمارات</h2>";
+  h+=list.map(function(x){
+    var fu=S.tasks.find(function(t){return t.exId===x.id;});
+    return '<div class="list-item" data-ex="'+esc(x.id)+'"><div class="avatar">🔄</div><div class="body"><div class="ttl">'+esc(tName(x.visitorId)||"—")+" ← "+esc(tName(x.hostId)||"—")+'</div><div class="meta">'+(x.date?fmtDate(x.date):"")+(x.lesson?" · "+esc(x.lesson):"")+"</div>"+
+      (fu?'<div class="meta">'+(fu.done?'<span class="tag done">تمت المتابعة</span>':'<span class="tag postponed">متابعة '+(fu.due?fmtShort(fu.due):"")+"</span>")+"</div>":"")+"</div>‹</div>";
+  }).join("")||'<div class="empty">لا توجد استمارات بعد</div>';
+  $("view").innerHTML=h;bindEvCards($("view"));
+  $("newEx").onclick=function(){location.hash="#exchange/new";};
+  $("view").querySelectorAll("[data-ex]").forEach(function(b){b.onclick=function(){location.hash="#exchange/"+b.dataset.ex;};});
+  $("view").querySelectorAll("[data-fromev]").forEach(function(b){b.onclick=function(ev){ev.stopPropagation();location.hash="#exchange/new-"+b.dataset.fromev;};});
+}
+function newExchange(fromEv){
+  var x={id:uid("x"),date:todayISO(),period:"",grade:"",lesson:"",visitorId:"",hostId:"",coordinator:S.settings.supervisor||"",goals:[],items:{},practices:"",discussion:"",planWhat:"",planWhen:addDays(todayISO(),14),planGrade:"",eventId:"",createdAt:new Date().toISOString()};
+  if(fromEv){x.eventId=fromEv.id;x.date=fromEv.date;var ids=fromEv.teacherIds||[];x.visitorId=ids[0]||"";x.hostId=ids[1]||"";}
+  return x;
+}
+function viewExchange(id){
+  var isNew=!id||id.indexOf("new")===0, ev=null;
+  if(isNew&&id&&id.indexOf("new-")===0)ev=evById(id.slice(4));
+  var x=isNew?newExchange(ev):clone(S.exchanges.find(function(e){return e.id===id;})||{});
+  if(!x.id){$("view").innerHTML='<div class="empty">الاستمارة غير موجودة</div>';return;}
+  var h='<a class="back" href="#exchanges">› الزيارات التبادلية</a><h2 style="margin-top:4px">🔄 استمارة الزيارة التبادلية</h2>';
+  h+='<div class="card"><h3 style="margin-top:0">أ. البيانات</h3>'+
+    '<div class="field"><label>المعلم الزائر</label><select id="xV">'+teacherOptions(x.visitorId)+"</select></div>"+
+    '<div class="field"><label>المعلم المزور</label><select id="xH">'+teacherOptions(x.hostId)+"</select></div>"+
+    '<div class="grid2"><div class="field"><label>التاريخ</label><input type="date" id="xDate" value="'+esc(x.date)+'"></div><div class="field"><label>الحصة</label><input id="xPeriod" value="'+esc(x.period)+'" placeholder="مثلًا: الثالثة"></div></div>'+
+    '<div class="grid2"><div class="field"><label>الصف / الشعبة</label><input id="xGrade" value="'+esc(x.grade)+'" placeholder="مثلًا: 6/2"></div><div class="field"><label>عنوان الدرس</label><input id="xLesson" value="'+esc(x.lesson)+'"></div></div>'+
+    '<div class="field"><label>المشرف المنسّق</label><input id="xCoord" value="'+esc(x.coordinator)+'"></div></div>';
+  h+='<div class="card"><h3 style="margin-top:0">ب. هدف الزيارة</h3><div class="checks" id="xGoals">'+EX_GOALS.map(function(g,i){return '<label><input type="checkbox" value="'+i+'"'+(x.goals.indexOf(i)>-1?" checked":"")+">"+g+"</label>";}).join("")+"</div></div>";
+  h+='<div class="card"><h3 style="margin-top:0">ج. بطاقة الملاحظة</h3>'+EX_ITEMS.map(function(t,i){var it=x.items[i]||{};
+      return '<div style="padding:8px 0;border-bottom:1px solid var(--line)"><div style="font-weight:700;margin-bottom:6px">'+(i+1)+". "+t+'</div><div class="chips" style="padding:0">'+
+        Object.keys(EX_LEVELS).map(function(k){return '<button type="button" class="chip'+(it.v===k?" on":"")+'" data-item="'+i+'" data-lv="'+k+'">'+EX_LEVELS[k]+"</button>";}).join("")+
+        '</div><input class="search" style="margin-top:6px;font-size:15px;padding:8px 12px" data-note="'+i+'" value="'+esc(it.note||"")+'" placeholder="ملاحظة قصيرة (اختياري)"></div>';}).join("")+"</div>";
+  h+='<div class="card"><h3 style="margin-top:0">د. ما بعد الزيارة</h3>'+
+    '<div class="field"><label>ممارسات متميزة سأنقلها لصفي</label><textarea id="xPract">'+esc(x.practices)+"</textarea></div>"+
+    '<div class="field"><label>نقاش ما بعد الحصة (أسئلة الزائر وإجابات المزور)</label><textarea id="xDisc">'+esc(x.discussion)+"</textarea></div>"+
+    '<div style="background:var(--brand-2);border-radius:12px;padding:12px"><b>📌 خطة التطبيق</b> <span class="small">(تتحول لمتابعة تظهر لك في «اليوم» وبطاقة المعلم الزائر)</span>'+
+      '<div class="field" style="margin-top:8px"><label>ماذا سأطبق؟</label><textarea id="xPW">'+esc(x.planWhat)+"</textarea></div>"+
+      '<div class="grid2"><div class="field"><label>متى؟ (موعد المتابعة)</label><input type="date" id="xPWhen" value="'+esc(x.planWhen)+'"></div><div class="field"><label>في أي صف؟</label><input id="xPG" value="'+esc(x.planGrade)+'"></div></div></div></div>';
+  h+='<div class="row" style="margin-bottom:10px"><button class="btn pri" id="xSave">💾 حفظ</button><button class="btn" id="xPrint">🖨️ طباعة / PDF</button>'+(isNew?"":'<button class="btn danger" id="xDel">حذف</button>')+"</div>";
+  h+='<p class="small">الاستمارة تنحفظ على جهازك. التوقيعات (الزائر، المزور، المشرف) تظهر في النسخة المطبوعة.</p>';
+  $("view").innerHTML=h;
+  var V=$("view");
+  V.querySelectorAll("[data-lv]").forEach(function(b){b.onclick=function(){var i=b.dataset.item;x.items[i]=x.items[i]||{};x.items[i].v=x.items[i].v===b.dataset.lv?"":b.dataset.lv;
+    V.querySelectorAll('[data-item="'+i+'"]').forEach(function(o){o.classList.toggle("on",o.dataset.lv===x.items[i].v);});};});
+  function collect(){
+    x.visitorId=$("xV").value;x.hostId=$("xH").value;x.date=$("xDate").value;x.period=$("xPeriod").value.trim();x.grade=$("xGrade").value.trim();x.lesson=$("xLesson").value.trim();x.coordinator=$("xCoord").value.trim();
+    x.goals=[].map.call(V.querySelectorAll("#xGoals input:checked"),function(c){return +c.value;});
+    V.querySelectorAll("[data-note]").forEach(function(n){var i=n.dataset.note;x.items[i]=x.items[i]||{};x.items[i].note=n.value.trim();});
+    x.practices=$("xPract").value.trim();x.discussion=$("xDisc").value.trim();x.planWhat=$("xPW").value.trim();x.planWhen=$("xPWhen").value;x.planGrade=$("xPG").value.trim();
+  }
+  function persist(){
+    collect();
+    if(!x.visitorId||!x.hostId){toast("اختر المعلم الزائر والمعلم المزور");return false;}
+    if(x.visitorId===x.hostId){toast("الزائر والمزور نفس المعلم");return false;}
+    var i=S.exchanges.findIndex(function(e){return e.id===x.id;});if(i>-1)S.exchanges[i]=x;else S.exchanges.push(x);
+    // ربط بموعد: نحدّث موعدًا مرتبطًا، أو ننشئ سجلًا منفذًا في المواعيد
+    var e=x.eventId&&evById(x.eventId);
+    if(e){e.status="done";e.date=x.date;e.teacherIds=[x.visitorId,x.hostId];e.schoolId=(teacher(x.hostId)||{}).schoolId||e.schoolId;}
+    else{var ne={id:uid("e"),type:"exchange",title:"زيارة تبادلية: "+tName(x.visitorId)+" ← "+tName(x.hostId),date:x.date,start:"",end:"",schoolId:(teacher(x.hostId)||{}).schoolId||"",teacherIds:[x.visitorId,x.hostId],place:"",notes:"",status:"done",repeat:"",reminders:[],exId:x.id};S.events.push(ne);x.eventId=ne.id;}
+    // مهمة المتابعة
+    var task=S.tasks.find(function(t){return t.exId===x.id;});
+    if(x.planWhat){
+      if(!task){task={id:uid("k"),exId:x.id,done:false,createdAt:new Date().toISOString()};S.tasks.push(task);}
+      task.title="متابعة تطبيق: "+x.planWhat;task.teacherId=x.visitorId;task.due=x.planWhen||"";task.grade=x.planGrade;task.source="زيارة تبادلية "+(x.date?fmtShort(x.date):"");
+    }else if(task&&!task.done){S.tasks=S.tasks.filter(function(t){return t!==task;});}
+    save();return true;
+  }
+  $("xSave").onclick=function(){if(persist()){toast("تم الحفظ ✓");location.hash="#exchange/"+x.id;}};
+  $("xPrint").onclick=function(){collect();printExchange(x);};
+  var del=$("xDel");if(del)del.onclick=function(){if(!confirm("حذف هذه الاستمارة ومتابعتها؟"))return;S.exchanges=S.exchanges.filter(function(e){return e.id!==x.id;});S.tasks=S.tasks.filter(function(t){return t.exId!==x.id;});save();toast("تم الحذف");location.hash="#exchanges";};
+}
+
+/* ============ الطباعة ============ */
+function printDoc(title,body,headHtml){
+  var old=$("printArea");if(old)old.remove();
+  var p=document.createElement("div");p.id="printArea";
+  p.innerHTML='<div class="p-head"><div>'+(headHtml||"سلطنة عُمان<br>وزارة التعليم<br>المديرية العامة للتعليم بشمال الشرقية<br>الإشراف التربوي — المهارات الموسيقية")+'</div><div class="p-title">'+esc(title)+"</div></div>"+body;
+  document.body.appendChild(p);document.body.classList.add("printing");
+  var done=function(){document.body.classList.remove("printing");window.removeEventListener("afterprint",done);};
+  window.addEventListener("afterprint",done);
+  setTimeout(function(){window.print();setTimeout(done,1500);},80);
+}
+function printExchange(x){
+  var row=function(k,v){return "<tr><th>"+k+"</th><td>"+esc(v||"")+"</td></tr>";};
+  var b='<table class="p-tbl">'+row("المعلم الزائر",tName(x.visitorId))+row("مدرسته",tSchool(x.visitorId))+row("المعلم المزور",tName(x.hostId))+row("مدرسته",tSchool(x.hostId))+
+    row("التاريخ",x.date?fmtDate(x.date,true):"")+row("الحصة",x.period)+row("الصف / الشعبة",x.grade)+row("عنوان الدرس",x.lesson)+row("المشرف المنسّق",x.coordinator)+"</table>";
+  b+='<h4>هدف الزيارة</h4><p>'+EX_GOALS.map(function(g,i){return (x.goals.indexOf(i)>-1?"☑":"☐")+" "+g;}).join("&nbsp;&nbsp; ")+"</p>";
+  b+='<h4>بطاقة الملاحظة</h4><table class="p-tbl p-obs"><tr><th>البند</th><th>متحقق بوضوح</th><th>جزئيًا</th><th>لم يُلاحظ</th><th>ملاحظة</th></tr>'+
+    EX_ITEMS.map(function(t,i){var it=x.items[i]||{};return "<tr><td>"+(i+1)+". "+t+"</td>"+["full","part","none"].map(function(k){return '<td style="text-align:center">'+(it.v===k?"✔":"")+"</td>";}).join("")+"<td>"+esc(it.note||"")+"</td></tr>";}).join("")+"</table>";
+  b+="<h4>ممارسات متميزة سأنقلها لصفي</h4><div class='p-box'>"+esc(x.practices).replace(/\n/g,"<br>")+"</div>";
+  b+="<h4>نقاش ما بعد الحصة</h4><div class='p-box'>"+esc(x.discussion).replace(/\n/g,"<br>")+"</div>";
+  b+="<h4>خطة التطبيق</h4><table class='p-tbl'>"+row("ماذا سأطبق",x.planWhat)+row("متى",x.planWhen?fmtDate(x.planWhen):"")+row("في أي صف",x.planGrade)+"</table>";
+  b+='<table class="p-sign"><tr><td>المعلم الزائر<br><br>'+esc(tName(x.visitorId))+"<br>التوقيع: ............</td><td>المعلم المزور<br><br>"+esc(tName(x.hostId))+"<br>التوقيع: ............</td><td>المشرف التربوي<br><br>"+esc(x.coordinator||"")+"<br>التوقيع: ............</td></tr></table>";
+  printDoc("استمارة الزيارة التبادلية",b);
+}
+
+/* ============ المتابعات ============ */
+function taskCard(t){
+  var late=!t.done&&t.due&&t.due<todayISO();
+  return '<div class="ev" style="--tc:var(--t-exchange)"><div class="when">'+(t.due?"<b>"+parseISO(t.due).getDate()+"</b>"+AR_MONTHS[parseISO(t.due).getMonth()]:"<b>—</b>")+'</div><div class="body"><div class="ttl">'+(t.done?"✅ ":"")+esc(t.title)+'</div><div class="meta">👤 '+esc(tName(t.teacherId))+(t.grade?" · الصف "+esc(t.grade):"")+" · "+esc(t.source||"")+(late?' <span class="tag missed">متأخرة</span>':"")+'</div><div class="sheet-actions">'+
+    (t.done?'<button class="btn sm" data-task="'+esc(t.id)+'" data-tv="0">↩️ إلغاء الإنجاز</button>':'<button class="btn sm" data-task="'+esc(t.id)+'" data-tv="1">✓ تمت المتابعة</button>')+
+    (t.exId?'<a class="btn sm" href="#exchange/'+esc(t.exId)+'">📄 الاستمارة</a>':"")+"</div></div></div>";
+}
+function bindTasks(root){root.querySelectorAll("[data-task]").forEach(function(b){b.onclick=function(){var t=S.tasks.find(function(k){return k.id===b.dataset.task;});if(!t)return;t.done=b.dataset.tv==="1";t.doneAt=t.done?new Date().toISOString():null;save();toast(t.done?"تم ✓":"تم الإلغاء");render();};});}
+function viewTasks(){
+  var open=S.tasks.filter(function(t){return !t.done;}).sort(function(a,b){return (a.due||"9").localeCompare(b.due||"9");});
+  var done=S.tasks.filter(function(t){return t.done;}).sort(function(a,b){return (b.doneAt||"").localeCompare(a.doneAt||"");});
+  var h='<a class="back" href="#work">› العمل</a><h2 style="margin-top:4px">🔁 المتابعات <span class="count">'+open.length+"</span></h2>";
+  h+=open.length?open.map(taskCard).join(""):'<div class="empty">لا توجد متابعات مفتوحة</div>';
+  if(done.length)h+='<h2>✅ تمت <span class="count">'+done.length+"</span></h2>"+done.slice(0,30).map(taskCard).join("");
+  $("view").innerHTML=h;bindTasks($("view"));
+}
+
+
+/* ============ المزامنة التلقائية بين الأجهزة (Firebase) ============ */
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBotJiDzJhYA5PTo2dmiiOxnCKnJhHCAiI",
+  authDomain: "personal-assistant-6d3b3.firebaseapp.com",
+  projectId: "personal-assistant-6d3b3",
+  storageBucket: "personal-assistant-6d3b3.firebasestorage.app",
+  messagingSenderId: "177343172225",
+  appId: "1:177343172225:web:99f2e7b2c5f6e166550780"
+};
+var FB_VER = "10.14.1";
+var SYNC_COLLS = ["events","teachers","schools","exchanges","tasks"];
+var SYNC_SETTINGS = ["supervisor","defRem","showSchoolCal","scInCal"];
+var SY = {state:"off",user:null,db:null,auth:null,ready:false,lastSync:null,err:"",unsubs:[],timer:null,applying:false};
+var SYNC_KEY="msa_sync";
+
+function syncMap(){try{return JSON.parse(localStorage.getItem(SYNC_KEY)||"{}");}catch(e){return {};}}
+function setSyncMap(m){try{localStorage.setItem(SYNC_KEY,JSON.stringify(m));}catch(e){}}
+function stable(v){if(Array.isArray(v))return "["+v.map(stable).join(",")+"]";if(v&&typeof v==="object")return "{"+Object.keys(v).sort().map(function(k){return JSON.stringify(k)+":"+stable(v[k]);}).join(",")+"}";return JSON.stringify(v===undefined?null:v);}
+function recHash(r){return stable(JSON.parse(JSON.stringify(r)));}
+function settingsRec(){var o={id:"settings"};SYNC_SETTINGS.forEach(function(k){if(S.settings[k]!==undefined)o[k]=S.settings[k];});return o;}
+function localColl(c){return c==="meta"?[settingsRec()]:(S[c]||[]);}
+function cleanRemote(d,id){var o={};Object.keys(d).forEach(function(k){if(k!=="_u"&&k!=="_del"&&k!=="_by")o[k]=d[k];});o.id=o.id||id;return o;}
+
+/* --- التغييرات المحلية اللي لازم ترتفع --- */
+function pendingChanges(){
+  var m=syncMap(),out=[];
+  SYNC_COLLS.concat(["meta"]).forEach(function(c){
+    var mm=m[c]||{},seen={};
+    localColl(c).forEach(function(r){if(!r||!r.id)return;seen[r.id]=1;var h=recHash(r);if(mm[r.id]!==h)out.push({c:c,id:r.id,rec:r,h:h});});
+    Object.keys(mm).forEach(function(id){if(!seen[id]&&mm[id]!=="__del")out.push({c:c,id:id,del:true});});
+  });
+  return out;
+}
+/* --- تطبيق تغيير وصل من جهاز ثاني --- */
+function applyRemote(c,id,data){
+  var m=syncMap();m[c]=m[c]||{};
+  if(data._del){
+    if(c!=="meta"&&S[c])S[c]=S[c].filter(function(r){return r.id!==id;});
+    m[c][id]="__del";setSyncMap(m);return true;
+  }
+  var r=cleanRemote(data,id);
+  if(c==="meta"){
+    SYNC_SETTINGS.forEach(function(k){if(r[k]!==undefined)S.settings[k]=r[k];});
+    m[c][id]=recHash(settingsRec());setSyncMap(m);return true;
+  }
+  S[c]=S[c]||[];
+  var i=S[c].findIndex(function(x){return x.id===id;});
+  if(i>-1)S[c][i]=r;else S[c].push(r);
+  m[c][id]=recHash(r);setSyncMap(m);return true;
+}
+
+/* --- تحميل مكتبة Firebase (أول مرة تحتاج إنترنت، وبعدها من الذاكرة) --- */
+function loadScript(src){return new Promise(function(ok,no){var s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s);});}
+function fbLoad(){
+  if(window.firebase&&firebase.firestore)return Promise.resolve();
+  var b="https://www.gstatic.com/firebasejs/"+FB_VER+"/";
+  return loadScript(b+"firebase-app-compat.js").then(function(){return Promise.all([loadScript(b+"firebase-auth-compat.js"),loadScript(b+"firebase-firestore-compat.js")]);});
+}
+function setSyncState(st,err){SY.state=st;SY.err=err||"";updateSyncBadge();if(route==="sync")viewSync();}
+function updateSyncBadge(){
+  var b=$("syncBadge");if(!b)return;
+  var map={off:["",""],signedout:["☁️","غير مسجّل"],loading:["☁️⏳","جاري الاتصال"],syncing:["☁️⏳","يزامن…"],ok:["☁️✓","متزامن"],offline:["☁️⏸","بدون إنترنت — ينحفظ ويرتفع لاحقًا"],error:["☁️⚠️","مشكلة في المزامنة"]};
+  var v=map[SY.state]||map.off;b.textContent=v[0];b.title=v[1];b.style.display=v[0]?"":"none";
+}
+function fbInit(){
+  if(SY.auth)return Promise.resolve();
+  return fbLoad().then(function(){
+    if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
+    SY.auth=firebase.auth();SY.db=firebase.firestore();
+    try{SY.db.enablePersistence({synchronizeTabs:true}).catch(function(){});}catch(e){}
+    SY.auth.onAuthStateChanged(function(u){
+      SY.user=u;
+      if(u){S.settings.syncEmail=u.email;save(true);startSync();}
+      else{stopSync();setSyncState("signedout");}
+    });
+  });
+}
+function userRef(){return SY.db.collection("users").doc(SY.user.uid);}
+function stopSync(){SY.unsubs.forEach(function(f){try{f();}catch(e){}});SY.unsubs=[];SY.ready=false;}
+function startSync(){
+  stopSync();setSyncState("syncing");
+  var first=!localStorage.getItem(SYNC_KEY);
+  var colls=SYNC_COLLS.concat(["meta"]);
+  // أول مرة على هذا الجهاز: ننزّل كل اللي في السحابة وندمجه، وبعدين نرفع اللي ناقص
+  Promise.all(colls.map(function(c){return userRef().collection(c).get().then(function(snap){return {c:c,snap:snap};});})).then(function(res){
+    SY.applying=true;
+    var cloudHas=0;
+    res.forEach(function(x){x.snap.forEach(function(doc){cloudHas++;
+      if(first){var d=doc.data();if(d._del){var m=syncMap();m[x.c]=m[x.c]||{};m[x.c][doc.id]="__del";setSyncMap(m);if(x.c!=="meta"&&S[x.c])S[x.c]=S[x.c].filter(function(r){return r.id!==doc.id;});}else applyRemote(x.c,doc.id,d);}
+    });});
+    SY.applying=false;
+    if(first&&!localStorage.getItem(SYNC_KEY))setSyncMap({});
+    save(true);render();
+    listen();
+    return pushChanges();
+  }).then(function(){SY.ready=true;}).catch(function(e){
+    setSyncState(navigator.onLine?"error":"offline",e&&e.message);
+    setTimeout(function(){if(SY.user&&!SY.ready)startSync();},20000);
+  });
+}
+function listen(){
+  SYNC_COLLS.concat(["meta"]).forEach(function(c){
+    var un=userRef().collection(c).onSnapshot({includeMetadataChanges:true},function(snap){
+      var changed=false;
+      snap.docChanges().forEach(function(ch){
+        if(ch.doc.metadata.hasPendingWrites)return;
+        if(ch.type==="removed")return;
+        var d=ch.doc.data(),m=syncMap(),cur=(m[c]||{})[ch.doc.id];
+        var incoming=d._del?"__del":recHash(cleanRemote(d,ch.doc.id));
+        if(c==="meta"&&!d._del)incoming=null;
+        if(cur===incoming)return;
+        SY.applying=true;applyRemote(c,ch.doc.id,d);SY.applying=false;changed=true;
+      });
+      if(changed){save(true);render();}
+      SY.lastSync=new Date();
+      setSyncState(snap.metadata.fromCache&&!navigator.onLine?"offline":(snap.metadata.hasPendingWrites?"syncing":"ok"));
+    },function(err){setSyncState("error",err&&err.message);});
+    SY.unsubs.push(un);
+  });
+}
+function pushChanges(){
+  if(!SY.user||!SY.db)return Promise.resolve();
+  var ch=pendingChanges();if(!ch.length){if(SY.state==="syncing")setSyncState(navigator.onLine?"ok":"offline");return Promise.resolve();}
+  setSyncState(navigator.onLine?"syncing":"offline");
+  var m=syncMap(),now=Date.now(),batches=[],b=SY.db.batch(),n=0;
+  ch.forEach(function(x){
+    var ref=userRef().collection(x.c).doc(String(x.id));
+    if(x.del){b.set(ref,{_del:true,_u:now});m[x.c]=m[x.c]||{};m[x.c][x.id]="__del";}
+    else{var d=JSON.parse(JSON.stringify(x.rec));d._u=now;b.set(ref,d);m[x.c]=m[x.c]||{};m[x.c][x.id]=x.h;}
+    if(++n>=400){batches.push(b);b=SY.db.batch();n=0;}
+  });
+  if(n)batches.push(b);
+  setSyncMap(m);// نسجّلها كأنها ارتفعت: Firebase يحفظها ويرفعها حتى لو انقطع النت
+  return Promise.all(batches.map(function(bb){return bb.commit();})).then(function(){SY.lastSync=new Date();setSyncState("ok");})
+    .catch(function(e){setSyncState(navigator.onLine?"error":"offline",e&&e.message);});
+}
+function schedulePush(){if(!SY.user||SY.applying)return;clearTimeout(SY.timer);SY.timer=setTimeout(pushChanges,800);}
+window.addEventListener("online",function(){if(SY.user){setSyncState("syncing");pushChanges();}});
+window.addEventListener("offline",function(){if(SY.user)setSyncState("offline");});
+
+/* --- شاشة المزامنة --- */
+var AUTH_ERR={"auth/invalid-email":"البريد غير صحيح","auth/missing-password":"اكتب كلمة المرور","auth/weak-password":"كلمة المرور قصيرة: 6 حروف أو أرقام على الأقل",
+  "auth/email-already-in-use":"هذا البريد له حساب من قبل. اضغط «دخول» بدل «إنشاء حساب»","auth/invalid-credential":"البريد أو كلمة المرور غلط",
+  "auth/wrong-password":"كلمة المرور غلط","auth/user-not-found":"ما فيه حساب بهذا البريد. اضغط «إنشاء حساب» أول مرة","auth/network-request-failed":"لازم إنترنت لتسجيل الدخول أول مرة",
+  "auth/too-many-requests":"محاولات كثيرة. انتظر دقائق وجرّب","auth/operation-not-allowed":"الدخول بالبريد وكلمة المرور مش مفعّل في Firebase بعد"};
+function viewSync(){
+  var h='<a class="back" href="#more">› المزيد</a><h2 style="margin-top:4px">☁️ المزامنة بين الأجهزة</h2>';
+  if(SY.user){
+    var st={ok:"✅ متزامن",syncing:"⏳ يزامن الحين…",offline:"⏸ بدون إنترنت: تعديلاتك محفوظة على الجهاز وبترتفع لحالها لما يرجع النت",error:"⚠️ مشكلة: "+esc(SY.err),loading:"⏳ جاري الاتصال"}[SY.state]||"";
+    h+='<div class="card"><p style="margin-top:0">مسجّل الدخول بـ: <b dir="ltr">'+esc(SY.user.email||"")+'</b></p><p>'+st+"</p>"+(SY.lastSync?'<p class="small">آخر مزامنة: '+SY.lastSync.toLocaleTimeString("ar",{hour:"numeric",minute:"2-digit",numberingSystem:"latn"})+"</p>":"")+
+      '<div class="sheet-actions"><button class="btn pri" id="syNow">🔄 زامن الحين</button><button class="btn" id="syOut">خروج من هذا الجهاز</button></div></div>';
+    h+='<div class="banner info">كل تعديل تسويه هنا يظهر على أجهزتك الثانية المسجّلة بنفس الحساب، خلال ثوانٍ لما يكون فيه إنترنت.</div>';
+  }else{
+    h+='<div class="card"><p style="margin-top:0">سجّل الدخول بنفس البريد وكلمة المرور على <b>الكمبيوتر والتليفون</b>، وبعدها أي تعديل على جهاز يظهر على الثاني لحاله.</p>'+
+      '<div class="field"><label>البريد الإلكتروني</label><input id="syEmail" type="email" dir="ltr" autocomplete="username" value="'+esc(S.settings.syncEmail||"")+'"></div>'+
+      '<div class="field"><label>كلمة المرور (6 حروف أو أرقام على الأقل)</label><input id="syPass" type="password" dir="ltr" autocomplete="current-password"></div>'+
+      '<div class="sheet-actions"><button class="btn pri" id="syIn">دخول</button><button class="btn" id="syUp">إنشاء حساب (أول مرة بس)</button></div>'+
+      '<p class="small"><a href="#" id="syForgot">نسيت كلمة المرور؟</a></p>'+(SY.err?'<div class="warnline">'+esc(SY.err)+"</div>":"")+"</div>";
+    h+='<div class="card small"><b>أول مرة:</b> على <b>الجهاز اللي فيه بياناتك كاملة</b> اضغط «إنشاء حساب»، فترتفع بياناتك. وعلى الجهاز الثاني اضغط «دخول» بنفس البريد وكلمة المرور، فتنزل البيانات وتندمج.</div>';
+  }
+  $("view").innerHTML=h;
+  function go(fn){
+    var em=$("syEmail").value.trim(),pw=$("syPass").value;SY.err="";
+    setSyncState("loading");
+    fbInit().then(function(){return fn(em,pw);}).catch(function(e){var code=e&&e.code;SY.err=AUTH_ERR[code]||(!navigator.onLine?"لازم إنترنت لتسجيل الدخول أول مرة":"تعذّر: "+(e&&e.message||""));setSyncState("signedout",SY.err);viewSync();});
+  }
+  if($("syIn"))$("syIn").onclick=function(){go(function(em,pw){return SY.auth.signInWithEmailAndPassword(em,pw);});};
+  if($("syUp"))$("syUp").onclick=function(){go(function(em,pw){return SY.auth.createUserWithEmailAndPassword(em,pw);});};
+  if($("syForgot"))$("syForgot").onclick=function(ev){ev.preventDefault();var em=$("syEmail").value.trim();if(!em){toast("اكتب بريدك أول");return;}
+    fbInit().then(function(){return SY.auth.sendPasswordResetEmail(em);}).then(function(){toast("وصلك رابط لتغيير كلمة المرور على بريدك");}).catch(function(e){toast(AUTH_ERR[e&&e.code]||"تعذّر الإرسال");});};
+  if($("syNow"))$("syNow").onclick=function(){startSync();};
+  if($("syOut"))$("syOut").onclick=function(){if(!confirm("تخرج من المزامنة على هذا الجهاز؟ بياناتك تظل على الجهاز."))return;SY.auth.signOut();try{localStorage.removeItem(SYNC_KEY);}catch(e){}};
+}
+/* لو الجهاز سجّل دخول من قبل: نشغّل المزامنة تلقائيًا عند الفتح */
+function syncBoot(){if(S.settings.syncEmail){setSyncState("loading");fbInit().catch(function(){setSyncState("offline");});}}
+
+/* ============ التنقل ============ */
+function render(){
+  if(S)autoComplete();
+  var hsh=(location.hash||"#today").slice(1).split("/");route=hsh[0]||"today";param=hsh[1]?decodeURIComponent(hsh[1]):null;
+  var tab={sync:"more",events:"plan",teachers:"work",teacher:"work",schools:"work",school:"work",backup:"more",install:"more",settings:"more",schoolcal:"work",methods:"work",exchanges:"work",exchange:"work",tasks:"work"}[route]||route;
+  document.querySelectorAll("#tabs a").forEach(function(a){a.classList.toggle("on",a.dataset.r===tab);});
+  var V={today:viewToday,events:viewEvents,plan:viewEvents,work:viewWork,teachers:viewTeachers,teacher:function(){viewTeacher(param);},schools:viewSchools,school:function(){viewSchool(param);},
+    more:viewMore,sync:viewSync,backup:viewBackup,install:viewInstall,settings:viewSettings,schoolcal:viewSchoolCal,methods:viewMethods,exchanges:viewExchanges,exchange:function(){viewExchange(param);},tasks:viewTasks};
+  (V[route]||viewToday)();
+  var d=new Date();$("todayLabel").textContent=AR_DAYS[d.getDay()]+" "+fmtDate(todayISO());
+}
+window.addEventListener("hashchange",function(){render();window.scrollTo(0,0);});
+$("navAdd").onclick=function(ev){ev.preventDefault();$("fab").onclick();};
+$("fab").onclick=function(){
+  var p={};if(route==="teacher"&&param){var t=teacher(param);if(t)p={type:"class",schoolId:t.schoolId,teacherIds:[t.id]};}
+  if(route==="school"&&param)p={type:"school",schoolId:param};
+  if((route==="events"||route==="plan")&&evView.mode==="month"&&evView.sel)p.date=evView.sel;
+  openEvent(null,p);
+};
+load();render();syncBoot();
+var lastDay=todayISO();setInterval(function(){if(todayISO()!==lastDay){lastDay=todayISO();render();}},60000);
+
+/* ============ العمل بدون إنترنت ============ */
+if("serviceWorker" in navigator&&location.protocol.indexOf("http")===0){
+  navigator.serviceWorker.register("sw.js").then(function(reg){
+    reg.addEventListener("updatefound",function(){var w=reg.installing;w&&w.addEventListener("statechange",function(){
+      if(w.state==="installed"&&navigator.serviceWorker.controller)toast("نسخة جديدة جاهزة. أغلق البرنامج وافتحه لتطبيقها.");});});
+  }).catch(function(){});
+}
+</script>
+</body>
+</html>

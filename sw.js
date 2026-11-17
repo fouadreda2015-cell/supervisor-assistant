@@ -1,9 +1,9 @@
 /* مساعد المشرف التربوي: العمل بدون إنترنت */
-var CACHE = "msa-v2.1";
+var CACHE = "msa-v2.2";
 var FONTS = "msa-fonts-v1";
 var FILES = ["./", "./index.html", "./seed.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 self.addEventListener("install", function (e) {
-  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES); }).then(function () { return self.skipWaiting(); }));
+  e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES.map(function (u) { return new Request(u, { cache: "reload" }); })); }).then(function () { return self.skipWaiting(); }));
 });
 self.addEventListener("activate", function (e) {
   e.waitUntil(caches.keys().then(function (ks) {
@@ -26,7 +26,8 @@ self.addEventListener("fetch", function (e) {
   // ملفات البرنامج: من الذاكرة أولًا، وتتحدث في الخلفية لما يكون فيه إنترنت
   e.respondWith(caches.open(CACHE).then(function (c) {
     return c.match(e.request, { ignoreSearch: true }).then(function (hit) {
-      var net = fetch(e.request).then(function (r) { if (r && r.ok) c.put(e.request, r.clone()); return r; }).catch(function () { return hit; });
+      var fresh = e.request.mode === "navigate" ? new Request(e.request.url, { cache: "no-cache", credentials: "same-origin" }) : new Request(e.request, { cache: "no-cache" });
+      var net = fetch(fresh).then(function (r) { if (r && r.ok) c.put(e.request, r.clone()); return r; }).catch(function () { return hit; });
       return hit || net;
     });
   }));
