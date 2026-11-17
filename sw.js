@@ -1,17 +1,29 @@
 /* مساعد المشرف التربوي: العمل بدون إنترنت */
-var CACHE = "msa-v1.5";
+var CACHE = "msa-v2.0";
+var FONTS = "msa-fonts-v1";
 var FILES = ["./", "./index.html", "./seed.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES); }).then(function () { return self.skipWaiting(); }));
 });
 self.addEventListener("activate", function (e) {
   e.waitUntil(caches.keys().then(function (ks) {
-    return Promise.all(ks.filter(function (k) { return k !== CACHE; }).map(function (k) { return caches.delete(k); }));
+    return Promise.all(ks.filter(function (k) { return k !== CACHE && k !== FONTS; }).map(function (k) { return caches.delete(k); }));
   }).then(function () { return self.clients.claim(); }));
 });
-// من الذاكرة أولًا (يفتح فورًا بدون إنترنت)، ويتحدّث في الخلفية لما يكون فيه إنترنت
 self.addEventListener("fetch", function (e) {
-  if (e.request.method !== "GET" || new URL(e.request.url).origin !== location.origin) return;
+  if (e.request.method !== "GET") return;
+  var url = new URL(e.request.url);
+  // الخطوط العربية من Google: تُحفظ أول مرة، وبعدها تشتغل بدون إنترنت
+  if (url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com") {
+    e.respondWith(caches.open(FONTS).then(function (c) {
+      return c.match(e.request).then(function (hit) {
+        return hit || fetch(e.request).then(function (r) { c.put(e.request, r.clone()); return r; }).catch(function () { return hit; });
+      });
+    }));
+    return;
+  }
+  if (url.origin !== location.origin) return;
+  // ملفات البرنامج: من الذاكرة أولًا، وتتحدث في الخلفية لما يكون فيه إنترنت
   e.respondWith(caches.open(CACHE).then(function (c) {
     return c.match(e.request, { ignoreSearch: true }).then(function (hit) {
       var net = fetch(e.request).then(function (r) { if (r && r.ok) c.put(e.request, r.clone()); return r; }).catch(function () { return hit; });
