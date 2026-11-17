@@ -3,17 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>مساعد المشرف التربوي</title>
+<title>المساعد الشخصي</title>
 <meta name="theme-color" content="#14365c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="مساعد المشرف">
+<meta name="apple-mobile-web-app-title" content="المساعد الشخصي">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+<link rel="icon" href="icon-192.png?v=2">
 <style>
 :root{
   --brand:#0e5c63; --brand-2:#e7f1f1; --ink:#1d2329; --muted:#66707a; --line:#e3e6ea;
@@ -300,7 +300,7 @@ nav.tabs a.add .ic{width:58px;height:58px;margin:-30px auto 2px;border-radius:50
 <rect y="192" width="800" height="8" fill="url(#frieze)"/>
 </svg>
       <div style="flex:1">
-        <h1>مساعد المشرف التربوي</h1>
+        <h1>المساعد الشخصي <span id="syncBadge" style="display:none;font-size:15px;cursor:pointer" onclick="location.hash='#sync'"></span></h1>
         <div class="sub" id="todayLabel"></div>
       </div>
     </header>
@@ -314,7 +314,7 @@ nav.tabs a.add .ic{width:58px;height:58px;margin:-30px auto 2px;border-radius:50
 <script>
 "use strict";
 /* ============ أساسيات ============ */
-var APP_VERSION = "2.0";
+var APP_VERSION = "2.2";
 var KEY = "msa_v1", PREV = "msa_prev";
 var TYPES = {
   school:   {name:"زيارة مدرسية",  c:"var(--t-school)",   g:"work", edu:1},
@@ -437,7 +437,7 @@ function load(){
   migrate(S);autoComplete();save(true);
 }
 function save(quiet){
-  try{localStorage.setItem(KEY,JSON.stringify(S));return true;}
+  try{localStorage.setItem(KEY,JSON.stringify(S));if(typeof schedulePush==="function")schedulePush();return true;}
   catch(e){if(!quiet)toast("تعذّر الحفظ على هذا الجهاز. خذ نسخة احتياطية الآن.");return false;}
 }
 try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
@@ -550,7 +550,7 @@ function veventLines(e){
   var desc=[];
   if(e.teacherIds&&e.teacherIds.length)desc.push("المعلمون: "+e.teacherIds.map(function(id){var t=teacher(id);return t?t.name:"";}).join("، "));
   if(e.notes)desc.push(e.notes);
-  desc.push("من برنامج مساعد المشرف التربوي");
+  desc.push("من برنامج المساعد الشخصي");
   L.push("DESCRIPTION:"+icsEsc(desc.join("\n")));
   var start=evStart(e),seen={};
   (e.reminders||[]).forEach(function(r){
@@ -673,7 +673,7 @@ var route="today",param=null,evView={mode:"month",filter:"upcoming",type:"",mont
 function viewToday(){
   var t=todayISO(),wk=addDays(t,7);
   if(!S.teachers.length&&!S.events.length&&!S.settings.startedEmpty){
-    $("view").innerHTML='<div class="card" style="text-align:center;padding:26px 18px"><div style="font-size:44px">👋</div><h3>أهلًا بك في مساعد المشرف التربوي</h3>'+
+    $("view").innerHTML='<div class="card" style="text-align:center;padding:26px 18px"><div style="font-size:44px">👋</div><h3>أهلًا بك في المساعد الشخصي</h3>'+
       '<p>للبدء، استورد ملف بياناتك (<b>بياناتي_الأولى_مساعد_المشرف.json</b>) أو أي نسخة احتياطية.</p>'+
       '<button class="btn pri" id="firstImport">📂 استيراد ملف البيانات</button><p><button class="btn" id="startEmpty">ابدأ بدون بيانات</button></p><p class="small" style="margin-top:14px">بياناتك تُحفظ على هذا الجهاز فقط، ولا تُرفع على الإنترنت.</p></div>';
     $("firstImport").onclick=function(){$("importFile").click();};
@@ -959,16 +959,25 @@ function viewSchoolCal(){
   $("scAll").onclick=function(){addSchoolCalToCalendar(SCHOOL_CAL.filter(function(x){return x.to>=t&&!inCal[x.id];}).map(function(x){return x.id;}));render();};
   $("view").querySelectorAll("[data-sci]").forEach(function(b){b.onclick=function(){addSchoolCalToCalendar([b.dataset.sci]);render();};});
 }
+function checkUpdate(){
+  if(!navigator.onLine){toast("لازم إنترنت للتحقق من التحديث");return;}
+  toast("جاري تنزيل آخر نسخة…");
+  var jobs=[];
+  try{if(window.caches)jobs.push(caches.keys().then(function(ks){return Promise.all(ks.filter(function(k){return k.indexOf("msa-v")===0;}).map(function(k){return caches.delete(k);}));}));}catch(e){}
+  try{if(navigator.serviceWorker)jobs.push(navigator.serviceWorker.getRegistration().then(function(r){return r&&r.update();}));}catch(e){}
+  Promise.all(jobs).catch(function(){}).then(function(){setTimeout(function(){location.reload();},600);});
+}
 function viewMore(){
   function item(go,ic,t,m){return '<div class="list-item" data-go="'+go+'"><div class="avatar">'+ic+'</div><div class="body"><div class="ttl">'+t+'</div><div class="meta">'+m+"</div></div>‹</div>";}
   var h='<h2 style="margin-top:4px">☰ المزيد</h2>'+
+    item("sync","☁️","المزامنة بين الأجهزة",SY.user?"✅ متصل: "+esc(SY.user.email||""):"سجّل الدخول، وتعديلات الكمبيوتر تظهر في التليفون لحالها")+
     item("settings","🔔","التنبيهات والإعدادات","أوقات التنبيه لكل نوع، صوت المنبه، اسمك")+
     item("backup","💾","النسخ الاحتياطي ونقل البيانات","نقل بياناتك بين الموبايل والكمبيوتر")+
-    item("install","📲","التثبيت على الموبايل","أيقونة على الشاشة، ويشتغل بدون إنترنت")+
-    '<div class="list-item soon"><div class="avatar">☁️</div><div class="body"><div class="ttl">المزامنة التلقائية بين الأجهزة <span class="tag">قريبًا</span></div><div class="meta">تعديل على الكمبيوتر يظهر في التليفون لحاله</div></div></div>';
-  h+='<p class="small" style="text-align:center;margin-top:18px">مساعد المشرف التربوي · الإصدار '+APP_VERSION+"</p>";
+    item("install","📲","التثبيت على الموبايل","أيقونة على الشاشة، ويشتغل بدون إنترنت");
+  h+='<div style="text-align:center;margin-top:18px"><button class="btn" id="chkUpd">🔄 تحقق من التحديث</button><p class="small">المساعد الشخصي · الإصدار '+APP_VERSION+"</p></div>";
   $("view").innerHTML=h;
   $("view").querySelectorAll("[data-go]").forEach(function(b){b.onclick=function(){location.hash="#"+b.dataset.go;};});
+  $("chkUpd").onclick=checkUpdate;
 }
 function viewBackup(){
   var lb=S.settings.lastBackup;
@@ -990,7 +999,7 @@ function stamp(){var d=new Date();return iso(d)+"_"+pad(d.getHours())+pad(d.getM
 function exportBackup(){
   S.settings.lastBackup=new Date().toISOString();save();
   var txt=JSON.stringify({app:"msa",version:APP_VERSION,exportedAt:S.settings.lastBackup,data:S});
-  var name="مساعد_المشرف_نسخة_"+stamp()+".json";
+  var name="المساعد_الشخصي_نسخة_"+stamp()+".json";
   try{
     var file=new File([txt],name,{type:"application/json"});
     if(isIOS()&&navigator.canShare&&navigator.canShare({files:[file]})){
@@ -1385,14 +1394,191 @@ function viewTasks(){
   $("view").innerHTML=h;bindTasks($("view"));
 }
 
+
+/* ============ المزامنة التلقائية بين الأجهزة (Firebase) ============ */
+var FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBotJiDzJhYA5PTo2dmiiOxnCKnJhHCAiI",
+  authDomain: "personal-assistant-6d3b3.firebaseapp.com",
+  projectId: "personal-assistant-6d3b3",
+  storageBucket: "personal-assistant-6d3b3.firebasestorage.app",
+  messagingSenderId: "177343172225",
+  appId: "1:177343172225:web:99f2e7b2c5f6e166550780"
+};
+var FB_VER = "10.14.1";
+var SYNC_COLLS = ["events","teachers","schools","exchanges","tasks"];
+var SYNC_SETTINGS = ["supervisor","defRem","showSchoolCal","scInCal"];
+var SY = {state:"off",user:null,db:null,auth:null,ready:false,lastSync:null,err:"",unsubs:[],timer:null,applying:false};
+var SYNC_KEY="msa_sync";
+
+function syncMap(){try{return JSON.parse(localStorage.getItem(SYNC_KEY)||"{}");}catch(e){return {};}}
+function setSyncMap(m){try{localStorage.setItem(SYNC_KEY,JSON.stringify(m));}catch(e){}}
+function stable(v){if(Array.isArray(v))return "["+v.map(stable).join(",")+"]";if(v&&typeof v==="object")return "{"+Object.keys(v).sort().map(function(k){return JSON.stringify(k)+":"+stable(v[k]);}).join(",")+"}";return JSON.stringify(v===undefined?null:v);}
+function recHash(r){return stable(JSON.parse(JSON.stringify(r)));}
+function settingsRec(){var o={id:"settings"};SYNC_SETTINGS.forEach(function(k){if(S.settings[k]!==undefined)o[k]=S.settings[k];});return o;}
+function localColl(c){return c==="meta"?[settingsRec()]:(S[c]||[]);}
+function cleanRemote(d,id){var o={};Object.keys(d).forEach(function(k){if(k!=="_u"&&k!=="_del"&&k!=="_by")o[k]=d[k];});o.id=o.id||id;return o;}
+
+/* --- التغييرات المحلية اللي لازم ترتفع --- */
+function pendingChanges(){
+  var m=syncMap(),out=[];
+  SYNC_COLLS.concat(["meta"]).forEach(function(c){
+    var mm=m[c]||{},seen={};
+    localColl(c).forEach(function(r){if(!r||!r.id)return;seen[r.id]=1;var h=recHash(r);if(mm[r.id]!==h)out.push({c:c,id:r.id,rec:r,h:h});});
+    Object.keys(mm).forEach(function(id){if(!seen[id]&&mm[id]!=="__del")out.push({c:c,id:id,del:true});});
+  });
+  return out;
+}
+/* --- تطبيق تغيير وصل من جهاز ثاني --- */
+function applyRemote(c,id,data){
+  var m=syncMap();m[c]=m[c]||{};
+  if(data._del){
+    if(c!=="meta"&&S[c])S[c]=S[c].filter(function(r){return r.id!==id;});
+    m[c][id]="__del";setSyncMap(m);return true;
+  }
+  var r=cleanRemote(data,id);
+  if(c==="meta"){
+    SYNC_SETTINGS.forEach(function(k){if(r[k]!==undefined)S.settings[k]=r[k];});
+    m[c][id]=recHash(settingsRec());setSyncMap(m);return true;
+  }
+  S[c]=S[c]||[];
+  var i=S[c].findIndex(function(x){return x.id===id;});
+  if(i>-1)S[c][i]=r;else S[c].push(r);
+  m[c][id]=recHash(r);setSyncMap(m);return true;
+}
+
+/* --- تحميل مكتبة Firebase (أول مرة تحتاج إنترنت، وبعدها من الذاكرة) --- */
+function loadScript(src){return new Promise(function(ok,no){var s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=no;document.head.appendChild(s);});}
+function fbLoad(){
+  if(window.firebase&&firebase.firestore)return Promise.resolve();
+  var b="https://www.gstatic.com/firebasejs/"+FB_VER+"/";
+  return loadScript(b+"firebase-app-compat.js").then(function(){return Promise.all([loadScript(b+"firebase-auth-compat.js"),loadScript(b+"firebase-firestore-compat.js")]);});
+}
+function setSyncState(st,err){SY.state=st;SY.err=err||"";updateSyncBadge();if(route==="sync")viewSync();}
+function updateSyncBadge(){
+  var b=$("syncBadge");if(!b)return;
+  var map={off:["",""],signedout:["☁️","غير مسجّل"],loading:["☁️⏳","جاري الاتصال"],syncing:["☁️⏳","يزامن…"],ok:["☁️✓","متزامن"],offline:["☁️⏸","بدون إنترنت — ينحفظ ويرتفع لاحقًا"],error:["☁️⚠️","مشكلة في المزامنة"]};
+  var v=map[SY.state]||map.off;b.textContent=v[0];b.title=v[1];b.style.display=v[0]?"":"none";
+}
+function fbInit(){
+  if(SY.auth)return Promise.resolve();
+  return fbLoad().then(function(){
+    if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
+    SY.auth=firebase.auth();SY.db=firebase.firestore();
+    try{SY.db.enablePersistence({synchronizeTabs:true}).catch(function(){});}catch(e){}
+    SY.auth.onAuthStateChanged(function(u){
+      SY.user=u;
+      if(u){S.settings.syncEmail=u.email;save(true);startSync();}
+      else{stopSync();setSyncState("signedout");}
+    });
+  });
+}
+function userRef(){return SY.db.collection("users").doc(SY.user.uid);}
+function stopSync(){SY.unsubs.forEach(function(f){try{f();}catch(e){}});SY.unsubs=[];SY.ready=false;}
+function startSync(){
+  stopSync();setSyncState("syncing");
+  var first=!localStorage.getItem(SYNC_KEY);
+  var colls=SYNC_COLLS.concat(["meta"]);
+  // أول مرة على هذا الجهاز: ننزّل كل اللي في السحابة وندمجه، وبعدين نرفع اللي ناقص
+  Promise.all(colls.map(function(c){return userRef().collection(c).get().then(function(snap){return {c:c,snap:snap};});})).then(function(res){
+    SY.applying=true;
+    var cloudHas=0;
+    res.forEach(function(x){x.snap.forEach(function(doc){cloudHas++;
+      if(first){var d=doc.data();if(d._del){var m=syncMap();m[x.c]=m[x.c]||{};m[x.c][doc.id]="__del";setSyncMap(m);if(x.c!=="meta"&&S[x.c])S[x.c]=S[x.c].filter(function(r){return r.id!==doc.id;});}else applyRemote(x.c,doc.id,d);}
+    });});
+    SY.applying=false;
+    if(first&&!localStorage.getItem(SYNC_KEY))setSyncMap({});
+    save(true);render();
+    listen();
+    return pushChanges();
+  }).then(function(){SY.ready=true;}).catch(function(e){
+    setSyncState(navigator.onLine?"error":"offline",e&&e.message);
+    setTimeout(function(){if(SY.user&&!SY.ready)startSync();},20000);
+  });
+}
+function listen(){
+  SYNC_COLLS.concat(["meta"]).forEach(function(c){
+    var un=userRef().collection(c).onSnapshot({includeMetadataChanges:true},function(snap){
+      var changed=false;
+      snap.docChanges().forEach(function(ch){
+        if(ch.doc.metadata.hasPendingWrites)return;
+        if(ch.type==="removed")return;
+        var d=ch.doc.data(),m=syncMap(),cur=(m[c]||{})[ch.doc.id];
+        var incoming=d._del?"__del":recHash(cleanRemote(d,ch.doc.id));
+        if(c==="meta"&&!d._del)incoming=null;
+        if(cur===incoming)return;
+        SY.applying=true;applyRemote(c,ch.doc.id,d);SY.applying=false;changed=true;
+      });
+      if(changed){save(true);render();}
+      SY.lastSync=new Date();
+      setSyncState(snap.metadata.fromCache&&!navigator.onLine?"offline":(snap.metadata.hasPendingWrites?"syncing":"ok"));
+    },function(err){setSyncState("error",err&&err.message);});
+    SY.unsubs.push(un);
+  });
+}
+function pushChanges(){
+  if(!SY.user||!SY.db)return Promise.resolve();
+  var ch=pendingChanges();if(!ch.length){if(SY.state==="syncing")setSyncState(navigator.onLine?"ok":"offline");return Promise.resolve();}
+  setSyncState(navigator.onLine?"syncing":"offline");
+  var m=syncMap(),now=Date.now(),batches=[],b=SY.db.batch(),n=0;
+  ch.forEach(function(x){
+    var ref=userRef().collection(x.c).doc(String(x.id));
+    if(x.del){b.set(ref,{_del:true,_u:now});m[x.c]=m[x.c]||{};m[x.c][x.id]="__del";}
+    else{var d=JSON.parse(JSON.stringify(x.rec));d._u=now;b.set(ref,d);m[x.c]=m[x.c]||{};m[x.c][x.id]=x.h;}
+    if(++n>=400){batches.push(b);b=SY.db.batch();n=0;}
+  });
+  if(n)batches.push(b);
+  setSyncMap(m);// نسجّلها كأنها ارتفعت: Firebase يحفظها ويرفعها حتى لو انقطع النت
+  return Promise.all(batches.map(function(bb){return bb.commit();})).then(function(){SY.lastSync=new Date();setSyncState("ok");})
+    .catch(function(e){setSyncState(navigator.onLine?"error":"offline",e&&e.message);});
+}
+function schedulePush(){if(!SY.user||SY.applying)return;clearTimeout(SY.timer);SY.timer=setTimeout(pushChanges,800);}
+window.addEventListener("online",function(){if(SY.user){setSyncState("syncing");pushChanges();}});
+window.addEventListener("offline",function(){if(SY.user)setSyncState("offline");});
+
+/* --- شاشة المزامنة --- */
+var AUTH_ERR={"auth/invalid-email":"البريد غير صحيح","auth/missing-password":"اكتب كلمة المرور","auth/weak-password":"كلمة المرور قصيرة: 6 حروف أو أرقام على الأقل",
+  "auth/email-already-in-use":"هذا البريد له حساب من قبل. اضغط «دخول» بدل «إنشاء حساب»","auth/invalid-credential":"البريد أو كلمة المرور غلط",
+  "auth/wrong-password":"كلمة المرور غلط","auth/user-not-found":"ما فيه حساب بهذا البريد. اضغط «إنشاء حساب» أول مرة","auth/network-request-failed":"لازم إنترنت لتسجيل الدخول أول مرة",
+  "auth/too-many-requests":"محاولات كثيرة. انتظر دقائق وجرّب","auth/operation-not-allowed":"الدخول بالبريد وكلمة المرور مش مفعّل في Firebase بعد"};
+function viewSync(){
+  var h='<a class="back" href="#more">› المزيد</a><h2 style="margin-top:4px">☁️ المزامنة بين الأجهزة</h2>';
+  if(SY.user){
+    var st={ok:"✅ متزامن",syncing:"⏳ يزامن الحين…",offline:"⏸ بدون إنترنت: تعديلاتك محفوظة على الجهاز وبترتفع لحالها لما يرجع النت",error:"⚠️ مشكلة: "+esc(SY.err),loading:"⏳ جاري الاتصال"}[SY.state]||"";
+    h+='<div class="card"><p style="margin-top:0">مسجّل الدخول بـ: <b dir="ltr">'+esc(SY.user.email||"")+'</b></p><p>'+st+"</p>"+(SY.lastSync?'<p class="small">آخر مزامنة: '+SY.lastSync.toLocaleTimeString("ar",{hour:"numeric",minute:"2-digit",numberingSystem:"latn"})+"</p>":"")+
+      '<div class="sheet-actions"><button class="btn pri" id="syNow">🔄 زامن الحين</button><button class="btn" id="syOut">خروج من هذا الجهاز</button></div></div>';
+    h+='<div class="banner info">كل تعديل تسويه هنا يظهر على أجهزتك الثانية المسجّلة بنفس الحساب، خلال ثوانٍ لما يكون فيه إنترنت.</div>';
+  }else{
+    h+='<div class="card"><p style="margin-top:0">سجّل الدخول بنفس البريد وكلمة المرور على <b>الكمبيوتر والتليفون</b>، وبعدها أي تعديل على جهاز يظهر على الثاني لحاله.</p>'+
+      '<div class="field"><label>البريد الإلكتروني</label><input id="syEmail" type="email" dir="ltr" autocomplete="username" value="'+esc(S.settings.syncEmail||"")+'"></div>'+
+      '<div class="field"><label>كلمة المرور (6 حروف أو أرقام على الأقل)</label><input id="syPass" type="password" dir="ltr" autocomplete="current-password"></div>'+
+      '<div class="sheet-actions"><button class="btn pri" id="syIn">دخول</button><button class="btn" id="syUp">إنشاء حساب (أول مرة بس)</button></div>'+
+      '<p class="small"><a href="#" id="syForgot">نسيت كلمة المرور؟</a></p>'+(SY.err?'<div class="warnline">'+esc(SY.err)+"</div>":"")+"</div>";
+    h+='<div class="card small"><b>أول مرة:</b> على <b>الجهاز اللي فيه بياناتك كاملة</b> اضغط «إنشاء حساب»، فترتفع بياناتك. وعلى الجهاز الثاني اضغط «دخول» بنفس البريد وكلمة المرور، فتنزل البيانات وتندمج.</div>';
+  }
+  $("view").innerHTML=h;
+  function go(fn){
+    var em=$("syEmail").value.trim(),pw=$("syPass").value;SY.err="";
+    setSyncState("loading");
+    fbInit().then(function(){return fn(em,pw);}).catch(function(e){var code=e&&e.code;SY.err=AUTH_ERR[code]||(!navigator.onLine?"لازم إنترنت لتسجيل الدخول أول مرة":"تعذّر: "+(e&&e.message||""));setSyncState("signedout",SY.err);viewSync();});
+  }
+  if($("syIn"))$("syIn").onclick=function(){go(function(em,pw){return SY.auth.signInWithEmailAndPassword(em,pw);});};
+  if($("syUp"))$("syUp").onclick=function(){go(function(em,pw){return SY.auth.createUserWithEmailAndPassword(em,pw);});};
+  if($("syForgot"))$("syForgot").onclick=function(ev){ev.preventDefault();var em=$("syEmail").value.trim();if(!em){toast("اكتب بريدك أول");return;}
+    fbInit().then(function(){return SY.auth.sendPasswordResetEmail(em);}).then(function(){toast("وصلك رابط لتغيير كلمة المرور على بريدك");}).catch(function(e){toast(AUTH_ERR[e&&e.code]||"تعذّر الإرسال");});};
+  if($("syNow"))$("syNow").onclick=function(){startSync();};
+  if($("syOut"))$("syOut").onclick=function(){if(!confirm("تخرج من المزامنة على هذا الجهاز؟ بياناتك تظل على الجهاز."))return;SY.auth.signOut();try{localStorage.removeItem(SYNC_KEY);}catch(e){}};
+}
+/* لو الجهاز سجّل دخول من قبل: نشغّل المزامنة تلقائيًا عند الفتح */
+function syncBoot(){if(S.settings.syncEmail){setSyncState("loading");fbInit().catch(function(){setSyncState("offline");});}}
+
 /* ============ التنقل ============ */
 function render(){
   if(S)autoComplete();
   var hsh=(location.hash||"#today").slice(1).split("/");route=hsh[0]||"today";param=hsh[1]?decodeURIComponent(hsh[1]):null;
-  var tab={events:"plan",teachers:"work",teacher:"work",schools:"work",school:"work",backup:"more",install:"more",settings:"more",schoolcal:"work",methods:"work",exchanges:"work",exchange:"work",tasks:"work"}[route]||route;
+  var tab={sync:"more",events:"plan",teachers:"work",teacher:"work",schools:"work",school:"work",backup:"more",install:"more",settings:"more",schoolcal:"work",methods:"work",exchanges:"work",exchange:"work",tasks:"work"}[route]||route;
   document.querySelectorAll("#tabs a").forEach(function(a){a.classList.toggle("on",a.dataset.r===tab);});
   var V={today:viewToday,events:viewEvents,plan:viewEvents,work:viewWork,teachers:viewTeachers,teacher:function(){viewTeacher(param);},schools:viewSchools,school:function(){viewSchool(param);},
-    more:viewMore,backup:viewBackup,install:viewInstall,settings:viewSettings,schoolcal:viewSchoolCal,methods:viewMethods,exchanges:viewExchanges,exchange:function(){viewExchange(param);},tasks:viewTasks};
+    more:viewMore,sync:viewSync,backup:viewBackup,install:viewInstall,settings:viewSettings,schoolcal:viewSchoolCal,methods:viewMethods,exchanges:viewExchanges,exchange:function(){viewExchange(param);},tasks:viewTasks};
   (V[route]||viewToday)();
   var d=new Date();$("todayLabel").textContent=AR_DAYS[d.getDay()]+" "+fmtDate(todayISO());
 }
@@ -1404,7 +1590,7 @@ $("fab").onclick=function(){
   if((route==="events"||route==="plan")&&evView.mode==="month"&&evView.sel)p.date=evView.sel;
   openEvent(null,p);
 };
-load();render();
+load();render();syncBoot();
 var lastDay=todayISO();setInterval(function(){if(todayISO()!==lastDay){lastDay=todayISO();render();}},60000);
 
 /* ============ العمل بدون إنترنت ============ */
