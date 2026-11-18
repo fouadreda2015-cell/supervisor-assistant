@@ -1,5 +1,5 @@
 /* مساعد المشرف التربوي: العمل بدون إنترنت */
-var CACHE = "msa-v2.7";
+var CACHE = "msa-v2.8";
 var FONTS = "msa-fonts-v1";
 var FILES = ["./", "./index.html", "./seed.js", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
 self.addEventListener("install", function (e) {

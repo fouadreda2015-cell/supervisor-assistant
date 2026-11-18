@@ -362,7 +362,7 @@ nav.tabs a.add .ic{width:58px;height:58px;margin:-30px auto 2px;border-radius:50
 <script>
 "use strict";
 /* ============ أساسيات ============ */
-var APP_VERSION = "2.7";
+var APP_VERSION = "2.8";
 var KEY = "msa_v1", PREV = "msa_prev";
 var TYPES = {
   school:   {name:"زيارة مدرسية",  c:"var(--t-school)",   g:"work", edu:1},
@@ -625,11 +625,16 @@ function deliverFile(text,name,mime){
   var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
   setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},2000);
 }
+/* «في التقويم» يُحفظ لكل جهاز لوحده (تقويم الآيفون غير تقويم الكمبيوتر)، ويسقط لو تغيّر التاريخ أو الوقت أو التنبيه */
+function calSig(e){return [e.date,e.start||"",e.end||"",e.repeat||"",e.until||"",JSON.stringify(e.reminders||[])].join("|");}
+function calMap(){try{return JSON.parse(localStorage.getItem("msa_incal")||"{}");}catch(x){return {};}}
+function inCal(e){var m=e&&(e._master?evById(e._master):e);if(!m)return false;var v=calMap()[m.id];return !!v&&v===calSig(m);}
+function markCal(list){var mp=calMap();list.forEach(function(e){mp[e.id]=calSig(e);});try{localStorage.setItem("msa_incal",JSON.stringify(mp));}catch(x){}}
 function addToCalendar(ids){
   var list=ids.map(evById).filter(function(e){return e&&e.date;});
   if(!list.length){toast("لا توجد مواعيد بتاريخ لإضافتها");return;}
   deliverFile(buildICS(list),list.length===1?"موعد.ics":"مواعيد.ics","text/calendar;charset=utf-8");
-  list.forEach(function(e){e.inCalendar=true;});save();
+  markCal(list);render();
 }
 function addSchoolCalToCalendar(ids){
   var rem=S.settings.defRem.holiday||[];
@@ -664,7 +669,7 @@ function evCard(e,opts){
   if(e.type!=="class"&&e.teacherIds&&e.teacherIds.length)meta.push("👤 "+e.teacherIds.length+" معلم");
   var st=e.status&&e.status!=="planned"&&!e.repeat?'<span class="tag '+e.status+'">'+STATUS[e.status]+(e.autoDone?" (تلقائي)":"")+(e.reschedTo&&evById(e.reschedTo)?" ← "+fmtShort(evById(e.reschedTo).date):"")+"</span>":"";
   var rep=e.repeat?'<span class="tag rep">🔁 '+REPEAT[e.repeat]+"</span>":"";
-  var cal=e.inCalendar&&(e.status==="planned"||e.repeat)?'<span class="tag">🔔 في التقويم</span>':"";
+  var cal=inCal(e)&&(e.status==="planned"||e.repeat)?'<span class="tag">🔔 في التقويم</span>':"";
   var hol=!e.sc&&e.date&&holidayOn(e.date)&&isWork(e.type)&&e.status==="planned"?'<div class="warnline">⚠️ هذا اليوم إجازة: '+esc(holidayOn(e.date).title)+"</div>":"";
   var id=e._master||e.id;
   return '<div class="ev" style="--tc:'+t.c+'" data-ev="'+esc(id)+'"><div class="when">'+when+'</div><div class="body">'+
@@ -704,7 +709,7 @@ function quickActions(e){
     h+='<div class="stbar">'+ST_BTNS.map(function(b){return '<button type="button" class="st'+(e.status===b[0]?" on st-"+b[0]:"")+'" data-st="'+b[0]+'" data-id="'+id+'" title="'+b[2]+'"><span>'+b[1]+"</span>"+b[2]+"</button>";}).join("")+"</div>";
     if((e.status==="missed"||e.status==="postponed")&&!e.reschedTo)h+='<button class="btn sm" data-act="resched" data-id="'+id+'">↻ حدد موعدًا جديدًا</button>';
   }
-  if((e.status==="planned"||e.repeat)&&!e.inCalendar&&(e.repeat||e.date>=todayISO()))h+='<button class="btn sm" data-act="cal" data-id="'+id+'">🔔 أضف للتقويم</button>';
+  if((e.status==="planned"||e.repeat)&&!inCal(e)&&(e.repeat||e.date>=todayISO()))h+='<button class="btn sm" data-act="cal" data-id="'+id+'">🔔 أضف للتقويم</button>';
   return h;
 }
 function scopeBar(){
@@ -754,7 +759,7 @@ function viewToday(){
   h+=today.length?today.map(function(e){return evCard(e,{timeOnly:true,actions:quickActions});}).join(""):'<div class="empty">لا توجد مواعيد اليوم</div>';
   h+='<h2>🗓️ خلال الأيام السبعة القادمة <span class="count">'+soon.length+"</span></h2>";
   h+=soon.length?soon.map(function(e){return evCard(e,{actions:quickActions});}).join(""):'<div class="empty">لا توجد مواعيد قادمة هذا الأسبوع</div>';
-  var notIn=soon.filter(function(e){return !e.sc&&!e.inCalendar;});
+  var notIn=soon.filter(function(e){return !e.sc&&!inCal(e)&&(e.status==="planned"||e.repeat);});
   if(notIn.length)h+='<div class="row" style="margin-top:6px"><button class="btn" id="calWeek">🔔 أضف مواعيد الأسبوع ('+notIn.length+') للتقويم</button></div>';
   var dueT=S.settings.scope==="life"?[]:S.tasks.filter(function(k){return !k.done&&(!k.due||k.due<=wk);}).sort(function(a,b){return (a.due||"").localeCompare(b.due||"");});
   if(dueT.length){h+='<h2>🔁 متابعات مستحقة <span class="count">'+dueT.length+"</span></h2>"+dueT.map(taskCard).join("");}
@@ -837,7 +842,7 @@ function viewEvents(){
       if(f.filter!=="repeat"){var dm=parseISO(e.date),m=AR_MONTHS[dm.getMonth()]+" "+dm.getFullYear();if(m!==lastM){h+="<h2>"+m+"</h2>";lastM=m;}}
       h+=evCard(e,{actions:quickActions});
     });
-    if(f.filter==="upcoming"){var ids={};list.forEach(function(e){if(!e.sc&&!e.inCalendar&&(e.status==="planned"||e.repeat))ids[e._master||e.id]=1;});var n=Object.keys(ids).length;
+    if(f.filter==="upcoming"){var ids={};list.forEach(function(e){if(!e.sc&&!inCal(e)&&(e.status==="planned"||e.repeat))ids[e._master||e.id]=1;});var n=Object.keys(ids).length;
       if(n)h+='<div class="row" style="margin-top:10px"><button class="btn" id="calAll">🔔 أضف '+n+" موعد قادم للتقويم</button></div>";
       f._calIds=Object.keys(ids);}
   }
@@ -1104,7 +1109,7 @@ function viewSettings(){
     if(!list.length){toast("لا توجد مواعيد قادمة من هذا النوع");return;}
     if(!confirm("تطبيق هذه التنبيهات على "+list.length+" موعد قادم من نوع «"+(TYPES[cur.type]||{name:""}).name+"»؟"))return;
     S.settings.defRem[cur.type]=clone(cur.rems);
-    list.forEach(function(e){e.reminders=clone(cur.rems);e.inCalendar=false;});save();
+    list.forEach(function(e){e.reminders=clone(cur.rems);});save();
     toast("تم التطبيق على "+list.length+" موعد ✓");
   };
   $("saveSet").onclick=function(){S.settings.supervisor=$("supName").value.trim();S.settings.headName=$("headName").value.trim();S.settings.directorName=$("dirName").value.trim();save();toast("تم الحفظ ✓");};
@@ -1175,7 +1180,7 @@ function openEvent(id,preset){
   var d=e?clone(e):{id:uid("e"),type:defType,title:"",date:preset.date||todayISO(),start:"",end:"",schoolId:preset.schoolId||"",
     teacherIds:preset.teacherIds||[],place:"",notes:"",status:"planned",repeat:"",until:"",reminders:clone(S.settings.defRem[defType]||[])};
   if(isNew){if(preset.title)d.title=preset.title;if(preset.start)d.start=preset.start;}
-  if(preset.resched){d.status="planned";d.date=addDays(todayISO(),1);d.inCalendar=false;}
+  if(preset.resched){d.status="planned";d.date=addDays(todayISO(),1);}
   var remTouched=!isNew;
   function typeButtons(g){return Object.keys(TYPES).filter(function(k){return TYPES[k].g===g;}).map(function(k){return '<button type="button" data-ty="'+k+'" style="--tc:'+TYPES[k].c+'"'+(d.type===k?' class="on"':"")+">"+TYPES[k].name+"</button>";}).join("");}
   var schoolOpts='<option value="">— بدون مدرسة —</option>'+S.schools.slice().sort(function(a,b){return a.name.localeCompare(b.name,"ar");}).map(function(s){return '<option value="'+esc(s.id)+'"'+(s.id===d.schoolId?" selected":"")+">"+esc(s.name)+" ("+esc(s.wilaya||"")+")</option>";}).join("");
@@ -1195,7 +1200,7 @@ function openEvent(id,preset){
     "</details>"+
     '<div class="row" style="margin-top:10px"><button class="btn pri" id="fSaveCal">💾 حفظ + 🔔 للتقويم</button><button class="btn" id="fSave">حفظ فقط</button>'+
     (!isNew?'<button class="btn danger" id="fDel">حذف</button>':"")+'<button class="btn" id="fCancel">إلغاء</button></div>'+
-    '<p class="small" style="margin-top:10px">«حفظ + للتقويم» يضيف الموعد وتنبيهاته لتقويم الموبايل، فيرن في وقته حتى والبرنامج مقفول.'+(!isNew&&d.inCalendar?" <b>لو عدّلت موعدًا مضافًا من قبل، احذف القديم من تقويم الموبايل.</b>":"")+"</p>"+
+    '<p class="small" style="margin-top:10px">«حفظ + للتقويم» يضيف الموعد وتنبيهاته لتقويم الموبايل، فيرن في وقته حتى والبرنامج مقفول.'+(!isNew&&inCal(e)?" <b>لو عدّلت موعدًا مضافًا من قبل، احذف القديم من تقويم الموبايل.</b>":"")+"</p>"+
     (!isNew&&d.date?'<p class="small">ما ظهرت نافذة التقويم؟ <a href="#" id="gcal" target="_blank" rel="noopener">أضفه عن طريق Google Calendar</a> (يحتاج إنترنت).</p>':"")+
     (d.source?'<p class="small">مصدر الموعد: '+esc(d.source)+"</p>":"")+
     (!isNew&&d.type==="exchange"?'<p><a class="btn" href="#exchange/'+esc(d.exId||"new-"+d.id)+'" id="fEx">📝 '+(d.exId?"فتح":"تعبئة")+" استمارة الزيارة التبادلية</a></p>":"");
@@ -1237,7 +1242,7 @@ function openEvent(id,preset){
       if(d.end&&d.start&&d.end<d.start){toast("وقت النهاية قبل البداية");return false;}
       if(d.repeat&&d.until&&d.until<d.date){toast("تاريخ نهاية التكرار قبل الموعد");return false;}
       if(!d.repeat)d.until="";
-      if(e&&(e.date!==d.date||e.start!==d.start||JSON.stringify(e.reminders)!==JSON.stringify(d.reminders)||e.repeat!==d.repeat))d.inCalendar=false;
+      if(e&&(e.date!==d.date||e.start!==d.start||JSON.stringify(e.reminders)!==JSON.stringify(d.reminders)||e.repeat!==d.repeat)){}
       var hl=holidayOn(d.date);
       if(hl&&isWork(d.type)&&d.status==="planned"&&(!e||e.date!==d.date)&&!confirm("تنبيه: "+fmtDate(d.date)+" إجازة رسمية ("+hl.title+").\nتحفظ الموعد في هذا اليوم؟"))return false;
       return true;
@@ -1504,7 +1509,6 @@ function syncCourseEvent(c){
   var changed=e.date!==c.dateFrom||e.start!==(c.start||"");
   e.title=(c.kind||"دورة")+": "+(c.title||"");e.date=c.dateFrom;e.start=c.start||"";e.place=c.place||"";
   e.notes=(c.dateTo&&c.dateTo!==c.dateFrom?"حتى "+fmtDate(c.dateTo)+"\n":"")+(c.trainer?"المدرب: "+c.trainer:"");
-  if(changed)e.inCalendar=false;
 }
 function cPlan(c,box){
   var f=function(k,l,type,ph){return '<div class="field"><label>'+l+'</label><input id="cp_'+k+'"'+(type?' type="'+type+'"':"")+' value="'+esc(c[k]||"")+'"'+(ph?' placeholder="'+ph+'"':"")+"></div>";};
