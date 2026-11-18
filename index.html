@@ -362,7 +362,7 @@ nav.tabs a.add .ic{width:58px;height:58px;margin:-30px auto 2px;border-radius:50
 <script>
 "use strict";
 /* ============ أساسيات ============ */
-var APP_VERSION = "2.5";
+var APP_VERSION = "2.6";
 var KEY = "msa_v1", PREV = "msa_prev";
 var TYPES = {
   school:   {name:"زيارة مدرسية",  c:"var(--t-school)",   g:"work", edu:1},
@@ -1743,7 +1743,7 @@ function viewAthar(){
   var V=S.visits||[],un=V.filter(function(v){return !v.teacherId;});
   var h='<a class="back" href="#work">› العمل</a><h2 style="margin-top:4px">🔗 ربط «جودة وأثر»</h2>';
   h+='<div class="card"><p style="margin-top:0">زياراتك الصفية تظل في «جودة وأثر». هنا تستورد <b>أرشيف الزيارات</b> منه، فتظهر لكل معلم نسبته ومستواه ومجالاته الخمسة والتوصيات.</p>'+
-    '<ol style="padding-right:20px;margin:0 0 10px"><li>في «جودة وأثر»: افتح <b>الأرشيف</b> واضغط <b>«نسخة احتياطية (JSON)»</b>.</li><li>هنا: اضغط <b>«استيراد أرشيف الزيارات»</b> واختر الملف.</li></ol>'+
+    '<ol style="padding-right:20px;margin:0 0 10px"><li>في «جودة وأثر»: خذ <b>نسخة من الأرشيف (JSON)</b>، أو <b>النسخة الشاملة / الاحتياطية</b>. البرنامج يقبل الاثنين.</li><li>هنا: اضغط <b>«استيراد أرشيف الزيارات»</b> واختر الملف.</li></ol>'+
     '<label style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><input type="checkbox" id="athTasks"'+(S.settings.atharTasks!==false?" checked":"")+'> حوّل توصيات كل زيارة جديدة إلى <b>متابعة</b> بعد شهر</label>'+
     '<button class="btn pri" id="athImp">📂 استيراد أرشيف الزيارات</button><input type="file" id="athFile" accept=".json,application/json" hidden>'+
     '<p class="small">الاستيراد يكمّل ولا يكرّر: لو استوردت الملف مرة ثانية، تتحدث الزيارات الموجودة وتنضاف الجديدة بس.</p></div>';
@@ -1778,7 +1778,14 @@ function linkVisitEvent(v){
 function importAthar(text){
   var j;try{j=JSON.parse(text);}catch(e){toast("الملف غير صالح");return;}
   var arr=j&&Array.isArray(j.visits)?j.visits:(Array.isArray(j)?j:null);
-  if(!arr){toast("هذا مش ملف أرشيف «جودة وأثر»");return;}
+  // النسخة الشاملة / الاحتياطية من «جودة وأثر»: الأرشيف محفوظ داخلها كنص
+  if(!arr&&j&&j.data&&typeof j.data==="object"){
+    var k=Object.keys(j.data).filter(function(x){return /moe_visits_archive$/.test(x);})[0];
+    if(k){try{var v=j.data[k];arr=typeof v==="string"?JSON.parse(v):v;}catch(e){arr=null;}}
+    if(k&&!Array.isArray(arr))arr=[];
+  }
+  if(!arr){toast("هذا مش ملف من «جودة وأثر». اختر «أرشيف الزيارات» أو «النسخة الشاملة»");return;}
+  if(!arr.length){toast("الملف ما فيه زيارات صفية محفوظة في الأرشيف");return;}
   S.visits=S.visits||[];var add=0,upd=0,map=S.settings.atharMap||{};
   arr.forEach(function(r){
     if(!r||!r.date)return;
